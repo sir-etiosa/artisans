@@ -1,0 +1,10 @@
+# business / personal assets — not part of the shipped project
+.claude/
+the-artisans-site-v2.jsx
+theartisans-business-deck*.pptx
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# web/ has its own .gitignore for node_modules, .next, build output, env files, etc.
