@@ -1,3 +1,5 @@
+export const TRADES = ["All", "Electrician", "Tailor", "Photographer", "Plumber"];
+
 export const ARTISANS = [
   {
     id: 1, name: "Chinedu Okafor", trade: "Electrician", level: "Professional",
@@ -98,23 +100,5 @@ export const ARTISANS = [
     ],
   },
 ];
-
-export const TRADES = ["All", "Electrician", "Tailor", "Photographer", "Plumber"];
-
-export const CATEGORIES = [
-  { t: "Electrician", n: 340 }, { t: "Plumber", n: 285 }, { t: "Tailor", n: 512 },
-  { t: "Photographer", n: 198 }, { t: "Makeup Artist", n: 176 }, { t: "Carpenter", n: 231 },
-  { t: "Web Developer", n: 143 }, { t: "Caterer", n: 167 },
-];
-
-export const CHAINS = [
-  { id: "base", label: "Base", sub: "Sepolia testnet" },
-  { id: "monad", label: "Monad", sub: "Testnet" },
-];
-
-/* Demo-only stand-in for a real wallet/A-Pass mint — swap for the Cleanverse
-   integration when it lands; the activation UI/flow can stay the same. */
-export const genWalletAddress = () =>
-  "0x" + Array.from({ length: 40 }, () => "0123456789abcdef"[Math.floor(Math.random() * 16)]).join("");
 
 export const getArtisan = (id) => ARTISANS.find((a) => String(a.id) === String(id));

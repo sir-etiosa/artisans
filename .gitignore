@@ -7,4 +7,7 @@ theartisans-business-deck*.pptx
 .DS_Store
 Thumbs.db
 
+./web/AGENTS.md
+./web/CLAUDE.md
+
 # web/ has its own .gitignore for node_modules, .next, build output, env files, etc.

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Seal } from "@/components/ui";
+import { Logo } from "@/components/ui";
 import ThemeToggle from "@/components/ThemeToggle";
 import { PAPER, LINE, INK, FOREST, MUTED } from "@/lib/theme";
 
@@ -21,7 +21,7 @@ export default function Nav() {
       style={{ background: `color-mix(in srgb, ${PAPER} 94%, transparent)`, backdropFilter: "blur(8px)", borderBottom: `1px solid ${LINE}` }}
     >
       <Link href="/" className="flex items-center gap-2">
-        <Seal size={30} />
+        <Logo size={30} />
         <span className="disp font-bold text-lg tracking-tight">The Artisans</span>
       </Link>
       <nav className="hidden md:flex items-center gap-6 text-sm font-medium" style={{ color: MUTED }} aria-label="Main">
@@ -33,12 +33,16 @@ export default function Nav() {
         <span className="hidden sm:block text-[13px]" style={{ color: MUTED }}>Surulere, Lagos</span>
         <ThemeToggle />
         <button
-          onClick={() => router.push("/auth")}
+          onClick={async () => {
+            await fetch("/api/auth/logout", { method: "POST" });
+            router.push("/auth");
+          }}
           className="disp font-bold flex items-center justify-center"
           style={{ width: 36, height: 36, borderRadius: 999, background: FOREST, color: "#fff" }}
-          aria-label="Account"
+          aria-label="Log out"
+          title="Log out"
         >
-          RO
+          ⏻
         </button>
       </div>
     </header>

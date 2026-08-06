@@ -1,4 +1,5 @@
 export { default as Seal } from "./Seal";
+export { default as Logo } from "./Logo";
 export { default as Btn } from "./Btn";
 export { default as Chip } from "./Chip";
 export { default as Score } from "./Score";
