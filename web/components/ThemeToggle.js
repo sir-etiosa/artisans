@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import { CARD, LINE, INK } from "@/lib/theme";
+import { THEME_COOKIE_NAME, THEME_COOKIE_MAX_AGE } from "@/lib/theme-mode/cookie";
 
-export default function ThemeToggle({ floating = false }) {
-  const [dark, setDark] = useState(false);
+export default function ThemeToggle({ floating = false, initialDark = false }) {
+  const [dark, setDark] = useState(initialDark);
 
   const toggle = () => {
     setDark((d) => {
       const next = !d;
       document.documentElement.classList.toggle("dark", next);
+      document.cookie = `${THEME_COOKIE_NAME}=${next ? "dark" : "light"}; path=/; max-age=${THEME_COOKIE_MAX_AGE}; samesite=lax`;
       return next;
     });
   };

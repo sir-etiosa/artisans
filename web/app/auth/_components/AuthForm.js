@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Btn } from "@/components/ui";
 import { MUTED, PINE, RED } from "@/lib/theme";
 
@@ -32,7 +33,7 @@ export default function AuthForm({ form }) {
           value={password} onChange={(e) => setPassword(e.target.value)} required minLength={authTab === "signup" ? 8 : undefined} />
       </div>
       {authTab === "login" && (
-        <button type="button" className="text-[13px] font-semibold underline" style={{ color: PINE }}>Forgot password?</button>
+        <Link href="/forgot-password" className="inline-block text-[13px] font-semibold underline" style={{ color: PINE }}>Forgot password?</Link>
       )}
       {error && <p className="text-[13px] font-medium" style={{ color: RED }}>{error}</p>}
       <Btn primary className="w-full !py-3.5" type="submit" disabled={loading} style={{ opacity: loading ? 0.6 : 1 }}>

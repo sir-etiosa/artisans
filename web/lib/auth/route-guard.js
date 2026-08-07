@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { SESSION_COOKIE_NAME, verifySessionToken } from "./jwt";
 
-const PUBLIC_PATHS = ["/auth", "/verify-email"];
+const PUBLIC_PATHS = ["/auth", "/verify-email", "/forgot-password", "/reset-password"];
 
 function isPublic(pathname) {
   return (

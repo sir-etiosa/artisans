@@ -1,6 +1,8 @@
+import { cookies } from "next/headers";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/Nav";
+import { THEME_COOKIE_NAME } from "@/lib/theme-mode/cookie";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -20,11 +22,14 @@ export const viewport = {
   ],
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const cookieStore = await cookies();
+  const dark = cookieStore.get(THEME_COOKIE_NAME)?.value === "dark";
+
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${inter.variable}${dark ? " dark" : ""}`}>
       <body className="pb-20">
-        <Nav />
+        <Nav initialDark={dark} />
         {children}
       </body>
     </html>

@@ -1,17 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Logo } from "@/components/ui";
 import ThemeToggle from "@/components/ThemeToggle";
-import { PAPER, LINE, INK, FOREST, MUTED } from "@/lib/theme";
+import AccountMenu from "@/components/account-menu/AccountMenu";
+import { PAPER, LINE, INK, MUTED } from "@/lib/theme";
 
-export default function Nav() {
+export default function Nav({ initialDark = false }) {
   const pathname = usePathname();
-  const router = useRouter();
 
   /* auth screen has its own full-bleed layout — just float the theme toggle */
-  if (pathname === "/auth") return <ThemeToggle floating />;
+  if (pathname === "/auth") return <ThemeToggle floating initialDark={initialDark} />;
 
   const isActive = (p) => pathname === p;
 
@@ -31,19 +31,8 @@ export default function Nav() {
       </nav>
       <div className="flex items-center gap-3">
         <span className="hidden sm:block text-[13px]" style={{ color: MUTED }}>Surulere, Lagos</span>
-        <ThemeToggle />
-        <button
-          onClick={async () => {
-            await fetch("/api/auth/logout", { method: "POST" });
-            router.push("/auth");
-          }}
-          className="disp font-bold flex items-center justify-center"
-          style={{ width: 36, height: 36, borderRadius: 999, background: FOREST, color: "#fff" }}
-          aria-label="Log out"
-          title="Log out"
-        >
-          ⏻
-        </button>
+        <ThemeToggle initialDark={initialDark} />
+        <AccountMenu />
       </div>
     </header>
   );

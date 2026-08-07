@@ -23,16 +23,16 @@ export default function HomePage() {
           Who do you need today?
         </h1>
         <form
-          className="card soft mt-6 flex flex-col sm:flex-row overflow-hidden"
-          style={{ borderRadius: 999, maxWidth: 720 }}
+          className="card soft mt-6 flex flex-col sm:flex-row overflow-hidden rounded-3xl sm:rounded-full"
+          style={{ maxWidth: 720 }}
           onSubmit={(e) => { e.preventDefault(); startSearch(TRADES.includes(query) ? query : "All"); }}
         >
           <label htmlFor="q" className="sr-only">Search for an artisan</label>
           <input id="q" value={query} onChange={(e) => setQuery(e.target.value)}
             placeholder="Try “electrician”, “agbada tailor”, “wedding photographer”…"
             className="flex-1 px-6 py-4 text-[15px] bg-transparent outline-none" />
-          <button type="submit" className="btn font-semibold px-8 py-4 m-1.5"
-            style={{ background: FOREST, color: "#fff", borderRadius: 999 }}>
+          <button type="submit" className="btn font-semibold px-8 py-4 m-1.5 rounded-full"
+            style={{ background: FOREST, color: "#fff" }}>
             Search
           </button>
         </form>
