@@ -40,7 +40,8 @@ export default function AuthForm({ form }) {
         {loading ? "Please wait…" : authTab === "signup" ? (role === "artisan" ? "Create account & start verification" : "Create account") : "Log in"}
       </Btn>
       <p className="text-[12px]" style={{ color: MUTED }}>
-        By continuing you agree to the Terms and Privacy Policy. We verify identities to keep both sides safe.
+        By continuing you agree to the Terms and{" "}
+        <Link href="/privacy" className="underline font-semibold" style={{ color: PINE }}>Privacy Policy</Link>. We verify identities to keep both sides safe.
       </p>
     </form>
   );

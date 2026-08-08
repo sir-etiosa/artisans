@@ -17,12 +17,6 @@ export default function BrandPanel() {
       </div>
       <div className="max-w-md">
         <p className="eyebrow">Verified skill, on demand</p>
-        <h1 className="disp font-bold mt-3 leading-[1.05]" style={{ fontSize: "2.9rem" }}>
-          Every hand here has a name, an ID, and a track record.
-        </h1>
-        <p className="mt-4 text-lg" style={{ color: "#ffffffcc" }}>
-          Electricians, tailors, developers, music producers, and photographers — government-ID verified, publicly rated, paid through escrow.
-        </p>
         <div className="mt-8" style={{ maxWidth: 380 }}>
           <CredentialCard a={DEMO_CREDENTIAL} compact />
         </div>

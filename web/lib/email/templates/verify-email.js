@@ -1,8 +1,9 @@
-export function verifyEmailTemplate({ name, verifyUrl }) {
+export function verifyEmailTemplate({ name, verifyUrl, logoUrl }) {
   return {
     subject: "Verify your email — The Artisans",
     html: `
       <div style="font-family:'Inter',system-ui,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;color:#0F2559;">
+        <img src="${logoUrl}" alt="The Artisans" width="36" height="36" style="border-radius:6px;display:block;margin:0 0 12px;" />
         <p style="font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#C9962E;margin:0 0 16px;">THE ARTISANS</p>
         <h1 style="font-size:22px;margin:0 0 12px;">Hi ${name.split(" ")[0]}, confirm your email</h1>
         <p style="font-size:15px;line-height:1.5;color:#57607A;margin:0 0 24px;">
