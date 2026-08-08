@@ -18,5 +18,9 @@ export const users = pgTable("users", {
   verificationStatus: text("verification_status").notNull().default("not_connected"),
   verificationCheckedAt: timestamp("verification_checked_at", { withTimezone: true }),
   verificationRaw: jsonb("verification_raw"),
+  // SHA-256 of (issuingCountryISO2 + idType + idNumber), unique — Cleanverse's
+  // API doesn't stop the same document from registering under a second
+  // wallet/account, so we enforce one-account-per-document ourselves.
+  verificationIdHash: text("verification_id_hash").unique(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

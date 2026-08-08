@@ -15,6 +15,6 @@ export async function GET() {
     return NextResponse.json({ error: "Not signed in" }, { status: 401 });
   }
 
-  const { passwordHash, walletPrivateKeyEnc, ...publicUser } = user;
+  const { passwordHash, walletPrivateKeyEnc, verificationIdHash, ...publicUser } = user;
   return NextResponse.json({ user: publicUser });
 }

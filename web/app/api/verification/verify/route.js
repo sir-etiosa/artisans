@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { getSession } from "@/lib/auth/session";
 import { isCleanverseConfigured } from "@/lib/cleanverse/client";
 import { generateApass, queryApass, normalizeApassStatus } from "@/lib/cleanverse/apass";
 import { provisionWallet } from "@/lib/wallet/provision";
+import { documentHash } from "@/lib/verification/document-hash";
 
 const identitySchema = z.object({
   idType: z.enum(["ID_CARD", "PASSPORT", "DRIVER_LICENSE", "HK_MACAO_TAIWAN_PASS", "RESIDENCE_PERMIT"]),
@@ -33,6 +34,14 @@ export async function POST(request) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid ID details" }, { status: 400 });
   }
 
+  const idHash = documentHash(parsed.data);
+  const existingOwner = await db.query.users.findFirst({
+    where: and(eq(users.verificationIdHash, idHash), ne(users.id, user.id)),
+  });
+  if (existingOwner) {
+    return NextResponse.json({ error: "This ID is already linked to another account" }, { status: 409 });
+  }
+
   // Accounts verified before wallet provisioning existed won't have one yet.
   if (!user.walletAddress) {
     const wallet = provisionWallet();
@@ -53,12 +62,21 @@ export async function POST(request) {
     return NextResponse.json({ error: genResult.message || genResult.error || "Verification request failed" }, { status: 502 });
   }
 
-  const [updated] = await db
-    .update(users)
-    .set({ verificationStatus: normalized.status, verificationCheckedAt: new Date(), verificationRaw: normalized.raw })
-    .where(eq(users.id, user.id))
-    .returning();
+  let updated;
+  try {
+    [updated] = await db
+      .update(users)
+      .set({ verificationStatus: normalized.status, verificationCheckedAt: new Date(), verificationRaw: normalized.raw, verificationIdHash: idHash })
+      .where(eq(users.id, user.id))
+      .returning();
+  } catch (err) {
+    // Unique-constraint race: someone else claimed this document between our check above and this write.
+    if (err?.code === "23505") {
+      return NextResponse.json({ error: "This ID is already linked to another account" }, { status: 409 });
+    }
+    throw err;
+  }
 
-  const { passwordHash, walletPrivateKeyEnc, ...publicUser } = updated;
+  const { passwordHash, walletPrivateKeyEnc, verificationIdHash: _idHash, ...publicUser } = updated;
   return NextResponse.json({ user: publicUser });
 }

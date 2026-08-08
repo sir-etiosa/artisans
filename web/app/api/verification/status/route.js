@@ -25,6 +25,6 @@ export async function GET() {
     .where(eq(users.id, user.id))
     .returning();
 
-  const { passwordHash, walletPrivateKeyEnc, ...publicUser } = updated;
+  const { passwordHash, walletPrivateKeyEnc, verificationIdHash, ...publicUser } = updated;
   return NextResponse.json({ user: publicUser });
 }
