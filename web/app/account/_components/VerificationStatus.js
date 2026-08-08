@@ -32,7 +32,9 @@ export default function VerificationStatus({ status, checkedAt, onUpdate }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const locked = status === "verified";
+  // "frozen" means a staff review rejected this — don't let the account
+  // self-serve a resubmit around that; it has to go through support.
+  const locked = status === "verified" || status === "frozen";
   const label = LABELS[status] || LABELS.not_connected;
   const color = COLORS[status];
 

@@ -29,6 +29,10 @@ export async function POST(request) {
   if (user.verificationStatus === "verified") {
     return NextResponse.json({ error: "Already verified" }, { status: 400 });
   }
+  // Staff rejected a prior submission — no self-serve resubmit around that.
+  if (user.verificationStatus === "frozen") {
+    return NextResponse.json({ error: "This account failed review. Contact support." }, { status: 400 });
+  }
   if (!isCleanverseConfigured()) {
     return NextResponse.json({ error: "Verification isn't configured yet" }, { status: 503 });
   }
