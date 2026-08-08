@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { cleanverseRequest } from "./client";
 
 const CHAIN = "monad";
@@ -8,16 +9,29 @@ export function customerIdForUser(userId) {
   return `U${userId.replace(/-/g, "")}`.slice(0, 32);
 }
 
-export async function generateApass({ userId, walletAddress }) {
+// Cleanverse accepts a SHA-256 hex hash in place of the raw ID number — we
+// always send the hash, so the actual document number never leaves this
+// process (not logged, not stored, not forwarded in the clear).
+function hashIdNumber(idNumber) {
+  return createHash("sha256").update(idNumber, "utf8").digest("hex");
+}
+
+export async function generateApass({ userId, walletAddress, identity }) {
   const expirationTime = Math.floor(Date.now() / 1000) + VALID_YEARS * 365 * 24 * 60 * 60;
-  return cleanverseRequest("/generate_apass", {
-    encrypted: true,
-    body: {
-      customerId: customerIdForUser(userId),
-      expirationTime,
-      wallet: { address: walletAddress, chain: CHAIN },
-    },
-  });
+  const body = {
+    customerId: customerIdForUser(userId),
+    expirationTime,
+    wallet: { address: walletAddress, chain: CHAIN },
+  };
+  if (identity) {
+    body.identityDataList = [{
+      idType: identity.idType,
+      fullName: identity.fullName,
+      idNumber: identity.idNumber ? hashIdNumber(identity.idNumber) : undefined,
+      issuingCountryISO2: identity.issuingCountryISO2,
+    }];
+  }
+  return cleanverseRequest("/generate_apass", { encrypted: true, body });
 }
 
 export async function queryApass({ walletAddress }) {
