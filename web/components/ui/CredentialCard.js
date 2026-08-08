@@ -18,7 +18,7 @@ export default function CredentialCard({ a, compact }) {
       <div className="p-5 flex gap-4 items-start">
         <div
           className="disp shrink-0 flex items-center justify-center font-bold"
-          style={{ width: 64, height: 64, borderRadius: 12, background: a.portfolio[0].c, color: FOREST, fontSize: 22, border: `1px solid ${LINE}` }}
+          style={{ width: 64, height: 64, borderRadius: 12, background: a.avatarColor, color: FOREST, fontSize: 22, border: `1px solid ${LINE}` }}
         >
           {a.name.split(" ").map((w) => w[0]).join("")}
         </div>

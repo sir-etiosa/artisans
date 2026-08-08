@@ -1,18 +1,27 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Btn, Seal } from "@/components/ui";
-import { getArtisan } from "@/lib/data";
 import { INK, LINE, MUTED, PAPER } from "@/lib/theme";
 
 function DoneInner() {
   const { id } = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const sel = getArtisan(id);
+  const [sel, setSel] = useState(undefined);
   const date = searchParams.get("date");
   const time = searchParams.get("time") || "10:00";
+
+  useEffect(() => {
+    fetch(`/api/artisans/${id}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setSel(data?.artisan ?? null));
+  }, [id]);
+
+  if (sel === undefined) {
+    return <main className="max-w-lg mx-auto px-4 md:px-8 pt-16 text-center"><p style={{ color: MUTED }}>Loading…</p></main>;
+  }
 
   if (!sel) {
     return (

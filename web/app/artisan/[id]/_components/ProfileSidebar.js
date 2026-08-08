@@ -1,9 +1,25 @@
+"use client";
+
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Btn, CredentialCard, Meter } from "@/components/ui";
 import { MUTED } from "@/lib/theme";
 
 export default function ProfileSidebar({ sel }) {
   const router = useRouter();
+  const [messaging, setMessaging] = useState(false);
+
+  const messageFirst = async () => {
+    setMessaging(true);
+    const res = await fetch("/api/messages/conversations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ otherUserId: sel.id }),
+    });
+    const data = await res.json();
+    if (res.ok) router.push(`/messages/${data.conversation.id}`);
+    else setMessaging(false);
+  };
 
   return (
     <div className="lg:sticky lg:top-24 space-y-5">
@@ -13,7 +29,9 @@ export default function ProfileSidebar({ sel }) {
         <Btn primary className="w-full mt-3" onClick={() => router.push(`/book/${sel.id}`)}>
           Book {sel.name.split(" ")[0]}
         </Btn>
-        <Btn className="w-full mt-2" small>Message first</Btn>
+        <Btn className="w-full mt-2" small disabled={messaging} onClick={messageFirst}>
+          {messaging ? "Starting…" : "Message first"}
+        </Btn>
         <p className="text-[12px] mt-3 text-center" style={{ color: MUTED }}>Payment held in escrow · released when you confirm</p>
       </div>
       <div className="card soft p-5">

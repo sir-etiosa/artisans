@@ -1,6 +1,12 @@
 import { Logo, CredentialCard } from "@/components/ui";
-import { ARTISANS } from "@/lib/data";
 import { FOREST } from "@/lib/theme";
+
+// Illustrative only — shown to logged-out visitors, not backed by a real account.
+const DEMO_CREDENTIAL = {
+  id: "demo", name: "Chinedu Okafor", level: "Professional", trade: "Electrician",
+  area: "Surulere, Lagos", score: 96, rating: 4.9, jobs: 214, since: "2019",
+  avatarColor: "#E8DFC9",
+};
 
 export default function BrandPanel() {
   return (
@@ -15,10 +21,10 @@ export default function BrandPanel() {
           Every hand here has a name, an ID, and a track record.
         </h1>
         <p className="mt-4 text-lg" style={{ color: "#ffffffcc" }}>
-          12,000+ electricians, tailors, developers, and photographers — government-ID verified, publicly rated, paid through escrow.
+          Electricians, tailors, developers, music producers, and photographers — government-ID verified, publicly rated, paid through escrow.
         </p>
         <div className="mt-8" style={{ maxWidth: 380 }}>
-          <CredentialCard a={ARTISANS[0]} compact />
+          <CredentialCard a={DEMO_CREDENTIAL} compact />
         </div>
       </div>
       <p className="text-[13px]" style={{ color: "#ffffff80" }}>Lagos · Abuja · Port Harcourt · Ibadan</p>

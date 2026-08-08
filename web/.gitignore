@@ -43,3 +43,6 @@ next-env.d.ts
 
 AGENTS.md
 CLAUDE.md
+
+# seeded test-account credentials — not for the repo
+ping-accounts.csv

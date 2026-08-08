@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Btn } from "@/components/ui";
-import { getArtisan } from "@/lib/data";
 import { MUTED, PINE } from "@/lib/theme";
 import StepIndicator from "./_components/StepIndicator";
 import ArtisanHeader from "./_components/ArtisanHeader";
@@ -14,9 +13,19 @@ import EscrowStep from "./_components/EscrowStep";
 export default function BookPage() {
   const { id } = useParams();
   const router = useRouter();
-  const sel = getArtisan(id);
+  const [sel, setSel] = useState(undefined);
   const [step, setStep] = useState(1);
   const [job, setJob] = useState({ desc: "", date: "", time: "10:00", addr: "" });
+
+  useEffect(() => {
+    fetch(`/api/artisans/${id}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setSel(data?.artisan ?? null));
+  }, [id]);
+
+  if (sel === undefined) {
+    return <main className="max-w-2xl mx-auto px-4 md:px-8 pt-16 text-center"><p style={{ color: MUTED }}>Loading…</p></main>;
+  }
 
   if (!sel) {
     return (

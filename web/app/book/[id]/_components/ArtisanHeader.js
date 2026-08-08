@@ -5,7 +5,7 @@ export default function ArtisanHeader({ sel }) {
   return (
     <div className="flex items-center gap-3 pb-4 mb-5" style={{ borderBottom: `1px solid ${LINE}` }}>
       <div className="disp flex items-center justify-center font-bold"
-        style={{ width: 42, height: 42, borderRadius: 10, background: sel.portfolio[0].c, border: `1px solid ${LINE}` }}>
+        style={{ width: 42, height: 42, borderRadius: 10, background: sel.avatarColor, border: `1px solid ${LINE}` }}>
         {sel.name.split(" ").map((w) => w[0]).join("")}
       </div>
       <div>

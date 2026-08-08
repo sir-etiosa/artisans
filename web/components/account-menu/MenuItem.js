@@ -14,7 +14,7 @@ export default function MenuItem({ href, onClick, danger, children }) {
 
   if (href) {
     return (
-      <Link href={href} className="btn" role="menuitem" style={style} onMouseEnter={hoverBg} onMouseLeave={clearBg}>
+      <Link href={href} className="btn" role="menuitem" style={style} onClick={onClick} onMouseEnter={hoverBg} onMouseLeave={clearBg}>
         {children}
       </Link>
     );

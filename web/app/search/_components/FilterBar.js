@@ -1,12 +1,11 @@
 import { Chip } from "@/components/ui";
-import { TRADES } from "@/lib/data";
 import { FOREST, INK, MUTED } from "@/lib/theme";
 
-export default function FilterBar({ trade, setTrade, maxKm, setMaxKm, minScore, setMinScore }) {
+export default function FilterBar({ trade, setTrade, availableTrades, maxKm, setMaxKm, minScore, setMinScore }) {
   return (
     <div className="card soft mt-5 p-4 flex flex-wrap gap-x-8 gap-y-4 items-center">
       <div className="flex flex-wrap gap-2" role="tablist" aria-label="Trade">
-        {TRADES.map((t) => (
+        {["All", ...availableTrades].map((t) => (
           <Chip key={t} role="tab" aria-selected={trade === t} active={trade === t} onClick={() => setTrade(t)}>{t}</Chip>
         ))}
       </div>

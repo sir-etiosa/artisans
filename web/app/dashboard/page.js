@@ -2,6 +2,8 @@
 
 import { Btn, Tick } from "@/components/ui";
 import { BRASS, BRASS_SOFT, CARD, FOREST, INK, LINE, MUTED, PAPER, PINE } from "@/lib/theme";
+import { timeOfDayGreeting } from "@/lib/greeting";
+import { useCurrentUser } from "@/lib/auth/useCurrentUser";
 
 const STATS = [
   { l: "Trust Score", v: "93", sub: "▲ 2 this month", dark: true },
@@ -23,16 +25,21 @@ const GROWTH_TIPS = [
 ];
 
 export default function DashboardPage() {
+  const { user } = useCurrentUser();
+
   return (
     <main className="max-w-6xl mx-auto px-4 md:px-8 pt-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="eyebrow">Artisan dashboard</p>
           <h1 className="disp font-bold mt-1" style={{ fontSize: "clamp(1.7rem,4vw,2.6rem)" }}>
-            Morning, John <span className="text-base font-normal" style={{ color: MUTED }}>· Carpenter · Verified<Tick /></span>
+            {timeOfDayGreeting()}{user ? `, ${user.fullName.split(" ")[0]}` : ""}{" "}
+            <span className="text-base font-normal" style={{ color: MUTED }}>
+              · Artisan{user?.emailVerified && <> · Verified<Tick /></>}
+            </span>
           </h1>
         </div>
-        <span className="text-[13px] font-semibold px-3 py-1.5 rounded-full" style={{ background: BRASS_SOFT, border: `1px solid ${BRASS}66` }}>
+        <span className="text-[13px] font-semibold px-3 py-1.5 rounded-full" style={{ background: BRASS_SOFT, color: FOREST, border: `1px solid ${BRASS}66` }}>
           2 new requests
         </span>
       </div>
@@ -76,7 +83,7 @@ export default function DashboardPage() {
             ))}
           </ul>
           <p className="text-[12px] mt-4" style={{ color: "#ffffff99" }}>Score 95+ unlocks featured placement in search.</p>
-          <Btn small className="mt-4" style={{ background: BRASS_SOFT, borderColor: BRASS }}>Upload certificate</Btn>
+          <Btn small className="mt-4" style={{ background: BRASS_SOFT, color: FOREST, borderColor: BRASS }}>Upload certificate</Btn>
         </section>
       </div>
     </main>

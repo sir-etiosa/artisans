@@ -1,31 +1,44 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ARTISANS, TRADES } from "@/lib/data";
 
 export function useSearchFilters() {
   const searchParams = useSearchParams();
 
-  const [trade, setTrade] = useState(() => {
-    const t = searchParams.get("trade");
-    return t && TRADES.includes(t) ? t : "All";
-  });
+  const [trade, setTrade] = useState(() => searchParams.get("trade") || "All");
   const [query] = useState(() => searchParams.get("q") || "");
   const [maxKm, setMaxKm] = useState(5);
   const [minScore, setMinScore] = useState(80);
+  const [artisans, setArtisans] = useState([]);
+  const [availableTrades, setAvailableTrades] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/artisans/categories")
+      .then((res) => (res.ok ? res.json() : { categories: [] }))
+      .then((data) => setAvailableTrades(data.categories.map((c) => c.trade)));
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (trade !== "All") params.set("trade", trade);
+    if (query) params.set("q", query);
+    fetch(`/api/artisans?${params}`)
+      .then((res) => (res.ok ? res.json() : { artisans: [] }))
+      .then((data) => setArtisans(data.artisans))
+      .finally(() => setLoading(false));
+  }, [trade, query]);
+
+  const changeTrade = (t) => {
+    setLoading(true);
+    setTrade(t);
+  };
 
   const results = useMemo(
-    () =>
-      ARTISANS.filter(
-        (a) =>
-          (trade === "All" || a.trade === trade) &&
-          (query.trim() === "" || (a.trade + " " + a.name + " " + a.tag).toLowerCase().includes(query.trim().toLowerCase())) &&
-          a.km <= maxKm &&
-          a.score >= minScore
-      ),
-    [trade, query, maxKm, minScore]
+    () => artisans.filter((a) => a.km <= maxKm && a.score >= minScore),
+    [artisans, maxKm, minScore]
   );
 
-  return { trade, setTrade, maxKm, setMaxKm, minScore, setMinScore, results };
+  return { trade, setTrade: changeTrade, maxKm, setMaxKm, minScore, setMinScore, results, availableTrades, loading };
 }
