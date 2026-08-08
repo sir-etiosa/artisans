@@ -26,14 +26,19 @@ export async function queryApass({ walletAddress }) {
   });
 }
 
-// A-Pass status per docs: 1 = active, 2 = frozen. No record yet = not_connected.
+// A-Pass status: 1 = active, 2 = frozen. "0002" = no A-Pass registered yet
+// for this wallet (confirmed live against sandbox — data comes back as "").
 const STATUS_MAP = { 1: "verified", 2: "frozen" };
+const NOT_FOUND_CODE = "0002";
 
 export function normalizeApassStatus(queryResult) {
+  if (queryResult.code === NOT_FOUND_CODE) {
+    return { status: "not_connected", raw: null };
+  }
   if (!queryResult.ok) {
     return { status: "error", raw: { code: queryResult.code, message: queryResult.message || queryResult.error } };
   }
-  const item = queryResult.data?.items?.[0];
-  if (!item) return { status: "not_connected", raw: null };
-  return { status: STATUS_MAP[item.status] || "unknown", raw: item };
+  const data = queryResult.data;
+  if (!data || data.cvRecordId == null) return { status: "not_connected", raw: null };
+  return { status: STATUS_MAP[data.status] || "unknown", raw: data };
 }
