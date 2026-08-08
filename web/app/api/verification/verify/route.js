@@ -2,12 +2,13 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { and, eq, ne } from "drizzle-orm";
 import { db } from "@/db";
-import { users } from "@/db/schema";
+import { users, verificationReviews } from "@/db/schema";
 import { getSession } from "@/lib/auth/session";
 import { isCleanverseConfigured } from "@/lib/cleanverse/client";
 import { generateApass, queryApass, normalizeApassStatus } from "@/lib/cleanverse/apass";
 import { provisionWallet } from "@/lib/wallet/provision";
 import { documentHash } from "@/lib/verification/document-hash";
+import { encryptSecret } from "@/lib/crypto/secret";
 
 const identitySchema = z.object({
   idType: z.enum(["ID_CARD", "PASSPORT", "DRIVER_LICENSE", "HK_MACAO_TAIWAN_PASS", "RESIDENCE_PERMIT"]),
@@ -76,6 +77,17 @@ export async function POST(request) {
     }
     throw err;
   }
+
+  // Fraud-review record — kept regardless of outcome so staff have a
+  // durable trail; the raw name/ID number only exist here, encrypted.
+  await db.insert(verificationReviews).values({
+    userId: user.id,
+    idType: parsed.data.idType,
+    issuingCountryIso2: parsed.data.issuingCountryISO2,
+    identityEnc: encryptSecret(JSON.stringify({ fullName: parsed.data.fullName, idNumber: parsed.data.idNumber })),
+    documentHash: idHash,
+    cleanverseRaw: normalized.raw,
+  });
 
   const { passwordHash, walletPrivateKeyEnc, verificationIdHash: _idHash, ...publicUser } = updated;
   return NextResponse.json({ user: publicUser });

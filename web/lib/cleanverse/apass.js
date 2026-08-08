@@ -40,6 +40,15 @@ export async function queryApass({ walletAddress }) {
   });
 }
 
+// status: "1" activate/unfreeze, "2" freeze. Used when staff reject a
+// submission in review — keeps Cleanverse's own record in sync with ours.
+export async function updateApassStatus({ walletAddress, status, blacklistReason }) {
+  return cleanverseRequest("/update_status", {
+    encrypted: true,
+    body: { status: String(status), blacklistReason, wallet: { chain: CHAIN, address: walletAddress } },
+  });
+}
+
 // A-Pass status: 1 = active, 2 = frozen. "0002" = no A-Pass registered yet
 // for this wallet (confirmed live against sandbox — data comes back as "").
 const STATUS_MAP = { 1: "verified", 2: "frozen" };

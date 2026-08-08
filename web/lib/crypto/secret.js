@@ -7,16 +7,18 @@ function masterKey() {
 }
 
 /* AES-256-GCM. Output packs iv(12) + authTag(16) + ciphertext, base64-encoded.
-   Server-only — never import this from a Client Component. */
-export function encryptPrivateKey(privateKeyHex) {
+   Server-only — never import this from a Client Component. Shared by wallet
+   private keys and submitted ID documents; both need reversible encryption
+   (private keys to sign with, ID documents for staff review). */
+export function encryptSecret(plaintext) {
   const iv = randomBytes(12);
   const cipher = createCipheriv("aes-256-gcm", masterKey(), iv);
-  const ciphertext = Buffer.concat([cipher.update(privateKeyHex, "utf8"), cipher.final()]);
+  const ciphertext = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
   const authTag = cipher.getAuthTag();
   return Buffer.concat([iv, authTag, ciphertext]).toString("base64");
 }
 
-export function decryptPrivateKey(encoded) {
+export function decryptSecret(encoded) {
   const raw = Buffer.from(encoded, "base64");
   const iv = raw.subarray(0, 12);
   const authTag = raw.subarray(12, 28);

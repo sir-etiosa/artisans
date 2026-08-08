@@ -7,6 +7,9 @@ theartisans-business-deck*.pptx
 .DS_Store
 Thumbs.db
 
+# Private reference notes (e.g. copied API docs) — not part of the shipped project
+/docs/
+
 ./web/AGENTS.md
 ./web/CLAUDE.md
 
