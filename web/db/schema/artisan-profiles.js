@@ -10,6 +10,11 @@ export const artisanProfiles = pgTable("artisan_profiles", {
   trade: text("trade").notNull(),
   tagline: text("tagline"),
   area: text("area"),
+  // Real coordinates from the browser Geolocation API, captured when the
+  // artisan sets up their profile — used for haversine distance search, not
+  // just the free-text `area` label.
+  lat: real("lat"),
+  lng: real("lng"),
   bio: text("bio"),
   yearsExperience: integer("years_experience").default(1),
   rate: text("rate"),

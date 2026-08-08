@@ -30,9 +30,7 @@ export default function PrivacyPolicyPage() {
         </Section>
 
         <Section title="How it's stored">
-          ID numbers and photos are encrypted before they&apos;re stored, and only accessible to the small team
-          handling verification review. Your ID number is also hashed to make sure the same document can&apos;t be
-          used to verify more than one account.
+          Your data is encrypted before it is stored, and only accessible during the verification review window.
         </Section>
 
         <Section title="How long we keep it">

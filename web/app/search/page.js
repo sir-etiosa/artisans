@@ -9,14 +9,17 @@ import ResultCard from "./_components/ResultCard";
 
 function ResultsInner() {
   const router = useRouter();
-  const { trade, setTrade, maxKm, setMaxKm, minScore, setMinScore, results, availableTrades, loading } = useSearchFilters();
+  const { trade, setTrade, maxKm, setMaxKm, minScore, setMinScore, results, availableTrades, loading, geoStatus } = useSearchFilters();
 
   return (
     <main className="max-w-6xl mx-auto px-4 md:px-8 pt-8">
       <button onClick={() => router.push("/")} className="text-sm font-semibold underline" style={{ color: PINE }}>← Home</button>
       <div className="flex flex-wrap items-end justify-between gap-3 mt-3">
         <h1 className="disp font-bold" style={{ fontSize: "clamp(1.7rem,4vw,2.6rem)" }}>
-          {trade === "All" ? "All artisans" : trade} <span className="text-base font-normal" style={{ color: MUTED }}>near Surulere</span>
+          {trade === "All" ? "All artisans" : trade}{" "}
+          <span className="text-base font-normal" style={{ color: MUTED }}>
+            {geoStatus === "granted" ? "near you" : "· enable location for distance"}
+          </span>
         </h1>
         <span className="text-sm font-semibold px-3 py-1 rounded-full" style={{ background: MIST }}>{results.length} match{results.length === 1 ? "" : "es"}</span>
       </div>

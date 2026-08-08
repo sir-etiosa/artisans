@@ -52,7 +52,7 @@ export default function HomePage() {
           </button>
         </form>
         <p className="text-[13px] mt-3" style={{ color: MUTED }}>
-          ⌖ Surulere, Lagos · showing verified artisans within 5 km
+          ⌖ Search shows real distance to verified artisans near you
         </p>
       </section>
 

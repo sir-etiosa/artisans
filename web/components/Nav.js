@@ -31,7 +31,6 @@ export default function Nav({ initialDark = false }) {
         <Link href="/dashboard" className="hover:underline" style={{ color: isActive("/dashboard") ? INK : undefined }}>Artisan dashboard</Link>
       </nav>
       <div className="flex items-center gap-3">
-        <span className="hidden sm:block text-[13px]" style={{ color: MUTED }}>Surulere, Lagos</span>
         <ThemeToggle initialDark={initialDark} />
         <AccountMenu />
       </div>

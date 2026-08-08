@@ -16,6 +16,8 @@ export default function BookPage() {
   const [sel, setSel] = useState(undefined);
   const [step, setStep] = useState(1);
   const [job, setJob] = useState({ desc: "", date: "", time: "10:00", addr: "" });
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState(null);
 
   useEffect(() => {
     fetch(`/api/artisans/${id}`)
@@ -36,8 +38,29 @@ export default function BookPage() {
     );
   }
 
-  const pay = () => {
-    router.push(`/done/${sel.id}?date=${encodeURIComponent(job.date)}&time=${encodeURIComponent(job.time)}`);
+  const pay = async () => {
+    setPaying(true);
+    setPayError(null);
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          artisanId: sel.id,
+          jobDescription: job.desc,
+          address: job.addr,
+          scheduledDate: job.date,
+          scheduledTime: job.time,
+          amount: sel.rate?.replace("From ", ""),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Couldn't create the booking");
+      router.push(`/done/${sel.id}?bookingId=${data.booking.id}&date=${encodeURIComponent(job.date)}&time=${encodeURIComponent(job.time)}`);
+    } catch (err) {
+      setPayError(err.message);
+      setPaying(false);
+    }
   };
 
   return (
@@ -50,7 +73,7 @@ export default function BookPage() {
         <ArtisanHeader sel={sel} />
         {step === 1 && <JobDetailsStep sel={sel} job={job} setJob={setJob} onContinue={() => setStep(2)} />}
         {step === 2 && <ScheduleStep sel={sel} job={job} setJob={setJob} onBack={() => setStep(1)} onContinue={() => setStep(3)} />}
-        {step === 3 && <EscrowStep sel={sel} onBack={() => setStep(2)} onPay={pay} />}
+        {step === 3 && <EscrowStep sel={sel} onBack={() => setStep(2)} onPay={pay} paying={paying} error={payError} />}
       </div>
     </main>
   );

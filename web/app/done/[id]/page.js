@@ -12,6 +12,7 @@ function DoneInner() {
   const [sel, setSel] = useState(undefined);
   const date = searchParams.get("date");
   const time = searchParams.get("time") || "10:00";
+  const bookingId = searchParams.get("bookingId");
 
   useEffect(() => {
     fetch(`/api/artisans/${id}`)
@@ -41,7 +42,7 @@ function DoneInner() {
           Request sent for <b style={{ color: INK }}>{date || "your chosen date"}, {time}</b>. You’ll get a notification the moment {sel.name.split(" ")[0]} accepts — then chat and live tracking open up.
         </p>
         <div className="mt-5 p-4 rounded-xl text-left text-[13px]" style={{ background: PAPER, border: `1px solid ${LINE}` }}>
-          <p className="font-semibold">Booking № TA-2026-08841</p>
+          <p className="font-semibold">Booking № {bookingId ? bookingId.slice(0, 8).toUpperCase() : "—"}</p>
           <p className="mt-1" style={{ color: MUTED }}>Status: awaiting artisan accept · Escrow: {sel.rate.replace("From ", "")}</p>
         </div>
         <div className="flex justify-center gap-3 mt-7">

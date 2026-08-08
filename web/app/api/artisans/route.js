@@ -3,13 +3,22 @@ import { and, desc, eq, ilike, or } from "drizzle-orm";
 import { db } from "@/db";
 import { artisanProfiles, users } from "@/db/schema";
 import { shapeArtisan } from "@/lib/artisans/shape-artisan";
+import { haversineKm } from "@/lib/geo/haversine";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const trade = searchParams.get("trade");
   const q = searchParams.get("q")?.trim();
+  // Customer's real coordinates, from the browser Geolocation API — absent
+  // when location was denied/unavailable, in which case distance is unknown
+  // rather than faked.
+  const custLat = searchParams.get("lat") ? Number(searchParams.get("lat")) : null;
+  const custLng = searchParams.get("lng") ? Number(searchParams.get("lng")) : null;
 
-  const conditions = [eq(users.role, "artisan")];
+  // Having a row in artisan_profiles (via the join below) is what makes
+  // someone an artisan — not the account's `role`, since any account can
+  // create a profile once verified.
+  const conditions = [];
   if (trade && trade !== "All") conditions.push(eq(artisanProfiles.trade, trade));
   if (q) {
     conditions.push(
@@ -24,6 +33,8 @@ export async function GET(request) {
       trade: artisanProfiles.trade,
       tagline: artisanProfiles.tagline,
       area: artisanProfiles.area,
+      lat: artisanProfiles.lat,
+      lng: artisanProfiles.lng,
       rate: artisanProfiles.rate,
       trustScore: artisanProfiles.trustScore,
       rating: artisanProfiles.rating,
@@ -33,8 +44,15 @@ export async function GET(request) {
     })
     .from(artisanProfiles)
     .innerJoin(users, eq(users.id, artisanProfiles.userId))
-    .where(and(...conditions))
+    .where(conditions.length ? and(...conditions) : undefined)
     .orderBy(desc(artisanProfiles.trustScore));
 
-  return NextResponse.json({ artisans: rows.map(shapeArtisan) });
+  const withDistance = rows.map((row) => ({
+    ...row,
+    km: custLat != null && custLng != null && row.lat != null && row.lng != null
+      ? Number(haversineKm(custLat, custLng, row.lat, row.lng).toFixed(1))
+      : null,
+  }));
+
+  return NextResponse.json({ artisans: withDistance.map(shapeArtisan) });
 }

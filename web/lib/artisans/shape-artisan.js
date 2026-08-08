@@ -1,4 +1,4 @@
-import { seededAvatarColor, seededKm } from "./seeded-values";
+import { seededAvatarColor } from "./seeded-values";
 
 // Maps DB rows onto the field names the existing UI components already
 // expect (kept from the old fixture) so pages only need a new data
@@ -25,6 +25,6 @@ export function shapeArtisan(row) {
     certs: row.certs || [],
     breakdown: row.breakdown || {},
     avatarColor: seededAvatarColor(row.id),
-    km: seededKm(row.id),
+    km: row.km ?? null,
   };
 }

@@ -1,7 +1,7 @@
 import { Btn } from "@/components/ui";
-import { LINE, MUTED, PAPER, PINE } from "@/lib/theme";
+import { LINE, MUTED, PAPER, PINE, RED } from "@/lib/theme";
 
-export default function EscrowStep({ sel, onBack, onPay }) {
+export default function EscrowStep({ sel, onBack, onPay, paying, error }) {
   const rate = sel.rate.replace("From ", "");
 
   return (
@@ -19,9 +19,12 @@ export default function EscrowStep({ sel, onBack, onPay }) {
         <li>{sel.name.split(" ")[0]} does the job; you track progress in the app.</li>
         <li>You tap “Job done” — funds release. Dispute? We hold and mediate.</li>
       </ol>
+      {error && <p className="text-[13px] font-medium mt-3" style={{ color: RED }}>{error}</p>}
       <div className="flex justify-between mt-6">
-        <Btn onClick={onBack}>Back</Btn>
-        <Btn primary onClick={onPay}>Pay {rate} to escrow</Btn>
+        <Btn onClick={onBack} disabled={paying}>Back</Btn>
+        <Btn primary onClick={onPay} disabled={paying} style={{ opacity: paying ? 0.6 : 1 }}>
+          {paying ? "Booking…" : `Pay ${rate} to escrow`}
+        </Btn>
       </div>
     </div>
   );
