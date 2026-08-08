@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { verificationReviews, users } from "@/db/schema";
 import { requireStaff } from "@/lib/auth/require-staff";
-import { updateApassStatus } from "@/lib/cleanverse/apass";
+import { updateApassStatus, queryApass, normalizeApassStatus } from "@/lib/cleanverse/apass";
 
 const decideSchema = z.object({
   decision: z.enum(["approved", "rejected"]),
@@ -39,6 +39,20 @@ export async function POST(request, { params }) {
       blacklistReason: parsed.data.note || "Failed manual review",
     });
     await db.update(users).set({ verificationStatus: "frozen" }).where(eq(users.id, user.id));
+  }
+
+  // Approve must actively unfreeze — generate_apass does NOT clear a prior
+  // freeze on its own (confirmed live: a resubmission on a frozen wallet
+  // still came back status 2), so without this an approval after any earlier
+  // rejection silently did nothing to the user's real status.
+  if (parsed.data.decision === "approved" && user.walletAddress) {
+    await updateApassStatus({ walletAddress: user.walletAddress, status: "1" });
+    const statusResult = await queryApass({ walletAddress: user.walletAddress });
+    const normalized = normalizeApassStatus(statusResult);
+    await db
+      .update(users)
+      .set({ verificationStatus: normalized.status, verificationCheckedAt: new Date(), verificationRaw: normalized.raw })
+      .where(eq(users.id, user.id));
   }
 
   await db
