@@ -1,5 +1,6 @@
 import { Tick } from "@/components/ui";
 import { LINE, MUTED } from "@/lib/theme";
+import VerificationStatus from "./VerificationStatus";
 
 function Row({ label, value }) {
   return (
@@ -10,7 +11,7 @@ function Row({ label, value }) {
   );
 }
 
-export default function ProfileInfo({ user }) {
+export default function ProfileInfo({ user, onUserUpdate }) {
   return (
     <section className="card soft p-6">
       <h2 className="disp font-bold text-[17px]">Your details</h2>
@@ -18,7 +19,9 @@ export default function ProfileInfo({ user }) {
         <Row label="Full name" value={user.fullName} />
         <Row label="Email" value={<>{user.email} {user.emailVerified && <Tick />}</>} />
         <Row label="Phone" value={user.phone || "—"} />
-        <Row label="Account type" value={user.role === "artisan" ? "Artisan" : "Customer"} />
+        <div style={{ borderBottom: `1px solid ${LINE}` }}>
+          <VerificationStatus status={user.verificationStatus} checkedAt={user.verificationCheckedAt} onUpdate={onUserUpdate} />
+        </div>
         <Row
           label="Wallet"
           value={user.walletAddress ? `${user.walletAddress.slice(0, 6)}…${user.walletAddress.slice(-4)} · ${user.walletChain}` : "Not activated"}

@@ -26,7 +26,7 @@ export default function AccountPage() {
         <p className="mt-4 text-[14px]" style={{ color: MUTED }}>Loading…</p>
       ) : (
         <div className="space-y-5 mt-5">
-          <ProfileInfo user={user} />
+          <ProfileInfo user={user} onUserUpdate={setUser} />
           <ChangePasswordForm />
         </div>
       )}

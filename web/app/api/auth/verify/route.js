@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { users, verificationTokens } from "@/db/schema";
 import { createSession } from "@/lib/auth/session";
+import { provisionWallet } from "@/lib/wallet/provision";
 
 export async function GET(request) {
   const url = new URL(request.url);
@@ -19,9 +20,18 @@ export async function GET(request) {
     return NextResponse.redirect(`${appUrl}/auth?error=invalid_token`);
   }
 
+  const existing = await db.query.users.findFirst({ where: eq(users.id, record.userId) });
+  const updates = { emailVerified: true };
+  if (existing && !existing.walletAddress) {
+    const wallet = provisionWallet();
+    updates.walletAddress = wallet.address;
+    updates.walletChain = "monad";
+    updates.walletPrivateKeyEnc = wallet.encryptedPrivateKey;
+  }
+
   const [user] = await db
     .update(users)
-    .set({ emailVerified: true })
+    .set(updates)
     .where(eq(users.id, record.userId))
     .returning();
 

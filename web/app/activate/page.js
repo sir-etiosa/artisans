@@ -3,17 +3,13 @@
 import { Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { Seal, Btn } from "@/components/ui";
-import { CHAINS } from "@/lib/data";
 import { MUTED } from "@/lib/theme";
 import { useActivation } from "./_hooks/useActivation";
-import NetworkPicker from "./_components/NetworkPicker";
-import ActivationSteps from "./_components/ActivationSteps";
 import WalletSummary from "./_components/WalletSummary";
 
 function ActivateInner() {
   const router = useRouter();
-  const { walletChain, setWalletChain, phase, walletAddress, role } = useActivation();
-  const chain = CHAINS.find((c) => c.id === walletChain);
+  const { phase, walletAddress, walletChain, role } = useActivation();
 
   return (
     <main className="max-w-lg mx-auto px-4 md:px-8 pt-16">
@@ -28,17 +24,17 @@ function ActivateInner() {
           </div>
         </div>
         <h1 className="disp font-bold mt-5" style={{ fontSize: "1.8rem" }}>
-          {phase === "ready" ? "Your wallet is active." : "Activating your account…"}
+          {phase === "ready" ? "Your wallet is active." : "Setting up your account…"}
         </h1>
         <p className="mt-2 text-[15px]" style={{ color: MUTED }}>
           {phase === "ready"
-            ? "Identity verified and a wallet is bound to your account — this is what escrow, staking, and payouts move through."
-            : "Hold on while we verify your credentials and set up your on-chain wallet."}
+            ? "A wallet is bound to your account. Head to Account & settings to verify your identity and unlock escrow, staking, and payouts."
+            : "Hold on while we finish setting up your on-chain wallet."}
         </p>
 
-        <NetworkPicker walletChain={walletChain} onChange={setWalletChain} locked={phase !== "verifying"} />
-        <ActivationSteps phase={phase} chainLabel={chain?.label} />
-        {phase === "ready" && <WalletSummary walletAddress={walletAddress} chainLabel={chain?.label} chainSub={chain?.sub} />}
+        {phase === "ready" && (
+          <WalletSummary walletAddress={walletAddress} chainLabel="Monad" chainSub={walletChain === "monad" ? "Testnet" : walletChain} />
+        )}
 
         <div className="flex justify-center gap-3 mt-7">
           <Btn

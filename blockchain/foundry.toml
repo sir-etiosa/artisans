@@ -1,0 +1,19 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+bytecode_hash = "none"  # disable ipfs
+cbor_metadata = false
+use_literal_content = true # use source code
+
+# Monad Configuration — points at the named endpoint below. Direct
+# "${ALCHEMY_RPC_URL}" interpolation on this key doesn't resolve on this
+# Foundry build; referencing an [rpc_endpoints] alias does.
+eth-rpc-url = "monad_testnet"
+chain_id = 10143
+
+[rpc_endpoints]
+monad_testnet = "${ALCHEMY_RPC_URL}"
+monad_testnet_public = "https://testnet-rpc.monad.xyz"
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
