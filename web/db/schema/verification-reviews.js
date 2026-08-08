@@ -11,6 +11,11 @@ export const verificationReviews = pgTable("verification_reviews", {
   idType: text("id_type").notNull(),
   issuingCountryIso2: text("issuing_country_iso2").notNull(),
   identityEnc: text("identity_enc").notNull(),
+  // Cleanverse's own schema has no image field — this is us, not them. The
+  // uploaded photo, base64'd then AES-256-GCM encrypted (same as identityEnc),
+  // so staff can eyeball it against the typed name/ID number.
+  idImageEnc: text("id_image_enc").notNull(),
+  idImageMimeType: text("id_image_mime_type").notNull(),
   documentHash: text("document_hash").notNull(),
   cleanverseRaw: jsonb("cleanverse_raw"),
   reviewStatus: text("review_status").notNull().default("pending"), // "pending" | "approved" | "rejected"

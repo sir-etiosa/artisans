@@ -15,10 +15,11 @@ export async function GET(request, { params }) {
 
   const user = await db.query.users.findFirst({ where: eq(users.id, review.userId) });
   const identity = JSON.parse(decryptSecret(review.identityEnc));
+  const idImageDataUrl = `data:${review.idImageMimeType};base64,${decryptSecret(review.idImageEnc)}`;
 
-  const { identityEnc, ...reviewMeta } = review;
+  const { identityEnc, idImageEnc, ...reviewMeta } = review;
   return NextResponse.json({
-    review: { ...reviewMeta, fullName: identity.fullName, idNumber: identity.idNumber },
+    review: { ...reviewMeta, fullName: identity.fullName, idNumber: identity.idNumber, idImageDataUrl },
     user: user ? { email: user.email, fullName: user.fullName, walletAddress: user.walletAddress, verificationStatus: user.verificationStatus } : null,
   });
 }

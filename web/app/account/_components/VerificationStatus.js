@@ -27,6 +27,8 @@ export default function VerificationStatus({ status, checkedAt, onUpdate }) {
   const [fullName, setFullName] = useState("");
   const [idNumber, setIdNumber] = useState("");
   const [issuingCountryISO2, setIssuingCountryISO2] = useState("");
+  const [idImage, setIdImage] = useState(null);
+  const [idImagePreview, setIdImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -34,16 +36,28 @@ export default function VerificationStatus({ status, checkedAt, onUpdate }) {
   const label = LABELS[status] || LABELS.not_connected;
   const color = COLORS[status];
 
+  const pickImage = (e) => {
+    const file = e.target.files?.[0] || null;
+    setIdImage(file);
+    setIdImagePreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return file ? URL.createObjectURL(file) : null;
+    });
+  };
+
   const submit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/verification/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idType, fullName, idNumber, issuingCountryISO2 }),
-      });
+      const body = new FormData();
+      body.set("idType", idType);
+      body.set("fullName", fullName);
+      body.set("idNumber", idNumber);
+      body.set("issuingCountryISO2", issuingCountryISO2);
+      if (idImage) body.set("idImage", idImage);
+
+      const res = await fetch("/api/verification/verify", { method: "POST", body });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Verification failed");
       onUpdate(data.user);
@@ -106,6 +120,14 @@ export default function VerificationStatus({ status, checkedAt, onUpdate }) {
               onChange={(e) => setIssuingCountryISO2(e.target.value.toUpperCase())}
               required
             />
+          </div>
+          <div>
+            <label className="label" htmlFor="idImage">Photo of the ID</label>
+            <input id="idImage" type="file" accept="image/jpeg,image/png,image/webp" className="field" onChange={pickImage} required />
+            {idImagePreview && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={idImagePreview} alt="Selected ID preview" className="mt-2 rounded-lg" style={{ maxHeight: 140, border: `1px solid ${LINE}` }} />
+            )}
           </div>
           {error && <p className="text-[13px] font-medium" style={{ color: RED }}>{error}</p>}
           <Btn primary small type="submit" disabled={loading} style={{ opacity: loading ? 0.6 : 1 }}>

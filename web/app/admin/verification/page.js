@@ -114,6 +114,11 @@ export default function AdminVerificationPage() {
               <div><span style={{ color: MUTED }}>ID number: </span>{detail.review.idNumber}</div>
               <div><span style={{ color: MUTED }}>Issuing country: </span>{detail.review.issuingCountryIso2}</div>
               <div><span style={{ color: MUTED }}>Cleanverse tier: </span>{detail.review.cleanverseRaw?.tier ?? "—"}</div>
+              <div>
+                <span style={{ color: MUTED }}>ID photo:</span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={detail.review.idImageDataUrl} alt="Submitted ID" className="mt-2 rounded-lg" style={{ maxWidth: "100%", border: `1px solid ${LINE}` }} />
+              </div>
 
               <textarea
                 className="field"

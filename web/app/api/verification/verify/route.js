@@ -17,6 +17,9 @@ const identitySchema = z.object({
   issuingCountryISO2: z.string().trim().toUpperCase().length(2, "Use a 2-letter country code"),
 });
 
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
 export async function POST(request) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
@@ -30,10 +33,32 @@ export async function POST(request) {
     return NextResponse.json({ error: "Verification isn't configured yet" }, { status: 503 });
   }
 
-  const parsed = identitySchema.safeParse(await request.json().catch(() => null));
+  const formData = await request.formData().catch(() => null);
+  if (!formData) return NextResponse.json({ error: "Invalid form submission" }, { status: 400 });
+
+  const parsed = identitySchema.safeParse({
+    idType: formData.get("idType"),
+    fullName: formData.get("fullName"),
+    idNumber: formData.get("idNumber"),
+    issuingCountryISO2: formData.get("issuingCountryISO2"),
+  });
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid ID details" }, { status: 400 });
   }
+
+  // Cleanverse's own schema has no image field — this is our own fraud check,
+  // so staff reviewing later can compare it against the typed details.
+  const idImage = formData.get("idImage");
+  if (!(idImage instanceof File) || idImage.size === 0) {
+    return NextResponse.json({ error: "A photo of the ID is required" }, { status: 400 });
+  }
+  if (!ALLOWED_IMAGE_TYPES.includes(idImage.type)) {
+    return NextResponse.json({ error: "ID photo must be a JPEG, PNG, or WebP image" }, { status: 400 });
+  }
+  if (idImage.size > MAX_IMAGE_BYTES) {
+    return NextResponse.json({ error: "ID photo must be under 5MB" }, { status: 400 });
+  }
+  const idImageBuffer = Buffer.from(await idImage.arrayBuffer());
 
   const idHash = documentHash(parsed.data);
   const existingOwner = await db.query.users.findFirst({
@@ -85,6 +110,8 @@ export async function POST(request) {
     idType: parsed.data.idType,
     issuingCountryIso2: parsed.data.issuingCountryISO2,
     identityEnc: encryptSecret(JSON.stringify({ fullName: parsed.data.fullName, idNumber: parsed.data.idNumber })),
+    idImageEnc: encryptSecret(idImageBuffer.toString("base64")),
+    idImageMimeType: idImage.type,
     documentHash: idHash,
     cleanverseRaw: normalized.raw,
   });
