@@ -10,7 +10,7 @@ export default function ResultCard({ a }) {
       <div className="flex justify-between items-start gap-3">
         <div className="flex gap-3.5 min-w-0">
           <div className="disp shrink-0 flex items-center justify-center font-bold"
-            style={{ width: 56, height: 56, borderRadius: 12, background: a.avatarColor, fontSize: 18, border: `1px solid ${LINE}` }}>
+            style={{ width: 56, height: 56, borderRadius: 12, background: a.avatarColor, color: "#fff", fontSize: 18, border: `1px solid ${LINE}` }}>
             {a.name.split(" ").map((w) => w[0]).join("")}
           </div>
           <div className="min-w-0">

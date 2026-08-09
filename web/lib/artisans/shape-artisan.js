@@ -20,7 +20,7 @@ export function shapeArtisan(row) {
     years: row.yearsExperience,
     response: row.responseMinutes != null ? `${row.responseMinutes} min` : undefined,
     repeat: row.repeatClientPct != null ? `${row.repeatClientPct}%` : undefined,
-    since: row.createdAt ? new Date(row.createdAt).getFullYear().toString() : undefined,
+    since: row.createdAt ? new Date(row.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : undefined,
     bio: row.bio,
     certs: row.certs || [],
     breakdown: row.breakdown || {},
