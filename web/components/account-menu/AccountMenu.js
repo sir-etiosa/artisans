@@ -1,6 +1,6 @@
 "use client";
 
-import { CARD, FOREST, LINE, MUTED } from "@/lib/theme";
+import { CARD, FOREST, LINE } from "@/lib/theme";
 import { useAccountMenu } from "./useAccountMenu";
 import MenuItem from "./MenuItem";
 
@@ -31,10 +31,7 @@ export default function AccountMenu() {
           className="card soft"
           style={{ position: "absolute", right: 0, top: 44, width: 220, background: CARD, border: `1px solid ${LINE}`, padding: 6, zIndex: 70 }}
         >
-          <div className="px-3 py-2">
-            <p className="text-[13px] font-semibold truncate">{user?.fullName || "…"}</p>
-            <p className="text-[12px] truncate" style={{ color: MUTED }}>{user?.email || ""}</p>
-          </div>
+          <MenuItem href="/dashboard" onClick={() => setOpen(false)}>Dashboard</MenuItem>
           <div style={{ height: 1, background: LINE, margin: "4px 0" }} />
           <MenuItem href="/account?tab=profile" onClick={() => setOpen(false)}>Profile</MenuItem>
           <MenuItem href="/account" onClick={() => setOpen(false)}>Account &amp; settings</MenuItem>
