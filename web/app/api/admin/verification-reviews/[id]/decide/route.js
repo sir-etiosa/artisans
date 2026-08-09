@@ -54,8 +54,16 @@ export async function POST(request, { params }) {
     const normalized = normalizeApassStatus(statusResult);
     cleanverseRaw = normalized.raw;
 
-    if (normalized.status === "not_connected" && !genResult.ok) {
-      return NextResponse.json({ error: genResult.message || genResult.error || "Cleanverse request failed" }, { status: 502 });
+    // Covers two distinct failure shapes: generate never created anything
+    // (not_connected + generate itself failed), or generate may have
+    // succeeded but the follow-up status check errored (a narrow
+    // network-blip window between the two calls). Either way, don't finalize
+    // this review as "approved" while the account's real status is anything
+    // other than genuinely verified — that would leave the review marked
+    // decided with no natural prompt to ever look at it again, while the
+    // user is stuck. Leaving the review "pending" lets the admin just retry.
+    if (normalized.status !== "verified") {
+      return NextResponse.json({ error: genResult.message || genResult.error || "Cleanverse didn't confirm verification — try again" }, { status: 502 });
     }
 
     await db
