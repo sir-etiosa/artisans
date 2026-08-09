@@ -5,6 +5,8 @@ import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/db";
 import { bookings, artisanProfiles, users } from "@/db/schema";
 import { getSession } from "@/lib/auth/session";
+import { escrowFromUser, getArtBalance, isArtTokenConfigured, nairaToArt } from "@/lib/art/send-art";
+import { logAuditEvent } from "@/lib/audit/log-event";
 
 const createSchema = z.object({
   artisanId: z.string().uuid(),
@@ -31,11 +33,35 @@ export async function POST(request) {
     return NextResponse.json({ error: "You can't book yourself" }, { status: 400 });
   }
 
+  const customer = await db.query.users.findFirst({ where: eq(users.id, session.userId) });
+  if (!customer || customer.verificationStatus !== "verified") {
+    return NextResponse.json({ error: "Verify your identity before booking" }, { status: 403 });
+  }
+  if (!isArtTokenConfigured()) {
+    return NextResponse.json({ error: "ART isn't wired up yet — can't hold escrow" }, { status: 503 });
+  }
+
+  const amountArt = nairaToArt(parsed.data.amountNaira);
+  const balance = await getArtBalance(customer.walletAddress);
+  if (balance == null || balance < amountArt) {
+    return NextResponse.json({ error: `Not enough ART — you have ${balance ?? 0}, need ${amountArt}. Deposit more first.` }, { status: 400 });
+  }
+
+  // Real ART moves to escrow (the operator wallet) before the booking ever
+  // exists — no booking row without funds genuinely locked up first.
+  const escrowResult = await escrowFromUser({ fromAddress: customer.walletAddress, amountArt });
+  if (!escrowResult.ok) return NextResponse.json({ error: escrowResult.error }, { status: 502 });
+
   const { artisanId, ...rest } = parsed.data;
   const [booking] = await db
     .insert(bookings)
-    .values({ customerId: session.userId, artisanProfileId: artisanProfile.id, ...rest })
+    .values({ customerId: session.userId, artisanProfileId: artisanProfile.id, ...rest, escrowTxHash: escrowResult.txHash })
     .returning();
+
+  await logAuditEvent({
+    actorUserId: session.userId, eventType: "booking_escrowed", targetType: "booking", targetId: booking.id,
+    metadata: { amountNaira: parsed.data.amountNaira, amountArt, escrowTxHash: escrowResult.txHash },
+  });
 
   return NextResponse.json({ booking });
 }
@@ -65,6 +91,8 @@ export async function GET() {
       amountNaira: bookings.amountNaira,
       platformFeeNaira: bookings.platformFeeNaira,
       payoutNaira: bookings.payoutNaira,
+      escrowTxHash: bookings.escrowTxHash,
+      releaseTxHash: bookings.releaseTxHash,
       status: bookings.status,
       createdAt: bookings.createdAt,
     })

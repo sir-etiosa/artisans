@@ -1,11 +1,14 @@
 import { Btn } from "@/components/ui";
 import { LINE, MUTED, PAPER, PINE, RED } from "@/lib/theme";
 import { computeBookingFee } from "@/lib/booking/fee";
+import { NAIRA_PER_ART } from "@/lib/art/constants";
 
-export default function EscrowStep({ sel, onBack, onPay, paying, error, amountNaira, setAmountNaira }) {
+export default function EscrowStep({ sel, onBack, onPay, paying, error, amountNaira, setAmountNaira, balanceArt }) {
   const amount = Number(amountNaira) || 0;
   const { platformFeeNaira, payoutNaira } = computeBookingFee(amount);
   const validAmount = amount > 0;
+  const requiredArt = amount / NAIRA_PER_ART;
+  const insufficientBalance = balanceArt != null && requiredArt > balanceArt;
 
   return (
     <div className="fade">
@@ -17,6 +20,12 @@ export default function EscrowStep({ sel, onBack, onPay, paying, error, amountNa
           value={amountNaira} onChange={(e) => setAmountNaira(e.target.value)}
           placeholder={sel.rate}
         />
+        {balanceArt != null && (
+          <p className="text-[12px] mt-1" style={{ color: insufficientBalance ? RED : MUTED }}>
+            Your balance: {balanceArt.toLocaleString()} ART (₦{(balanceArt * NAIRA_PER_ART).toLocaleString()})
+            {insufficientBalance && " — not enough for this job. Deposit more first."}
+          </p>
+        )}
       </div>
       <div className="mt-3 rounded-xl overflow-hidden" style={{ border: `1px solid ${LINE}` }}>
         <div className="flex justify-between px-4 py-3 text-sm"><span style={{ color: MUTED }}>Job price</span><span className="font-semibold">₦{amount.toLocaleString()}</span></div>
@@ -28,14 +37,14 @@ export default function EscrowStep({ sel, onBack, onPay, paying, error, amountNa
         </div>
       </div>
       <ol className="mt-4 space-y-1.5 text-[13px] list-decimal list-inside" style={{ color: MUTED }}>
-        <li>You pay now — we hold it, not the artisan.</li>
+        <li>You pay now — real ART moves to escrow, not to {sel.name.split(" ")[0]} directly.</li>
         <li>{sel.name.split(" ")[0]} does the job; you track progress in the app.</li>
-        <li>You tap “Job done” — funds release. Dispute? We hold and mediate.</li>
+        <li>You tap “Job done” — escrow releases. Dispute or no-show? We step in and resolve it.</li>
       </ol>
       {error && <p className="text-[13px] font-medium mt-3" style={{ color: RED }}>{error}</p>}
       <div className="flex justify-between mt-6">
         <Btn onClick={onBack} disabled={paying}>Back</Btn>
-        <Btn primary onClick={onPay} disabled={paying || !validAmount} style={{ opacity: paying || !validAmount ? 0.6 : 1 }}>
+        <Btn primary onClick={onPay} disabled={paying || !validAmount || insufficientBalance} style={{ opacity: paying || !validAmount || insufficientBalance ? 0.6 : 1 }}>
           {paying ? "Booking…" : `Pay ₦${amount.toLocaleString()} to escrow`}
         </Btn>
       </div>

@@ -56,6 +56,15 @@ export default function AdminHubPage() {
           </p>
         </a>
 
+        <a href={canApproveDeposits ? "/admin/bookings" : undefined}
+          className="card soft p-5 block"
+          style={{ opacity: canApproveDeposits ? 1 : 0.4, pointerEvents: canApproveDeposits ? "auto" : "none" }}>
+          <h2 className="disp font-bold text-[16px]">Booking disputes</h2>
+          <p className="text-[13px] mt-1" style={{ color: MUTED }}>
+            Bookings holding real ART in escrow, stuck unresolved — release, refund, or split.
+          </p>
+        </a>
+
         <a href={user.adminRole === "full" ? "/admin/audit" : undefined}
           className="card soft p-5 block"
           style={{ opacity: user.adminRole === "full" ? 1 : 0.4, pointerEvents: user.adminRole === "full" ? "auto" : "none" }}>

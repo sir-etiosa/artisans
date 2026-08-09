@@ -19,6 +19,13 @@ export default function BookPage() {
   const [amountNaira, setAmountNaira] = useState("");
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState(null);
+  const [balanceArt, setBalanceArt] = useState(undefined);
+
+  useEffect(() => {
+    fetch("/api/wallet/balance")
+      .then((res) => (res.ok ? res.json() : { balanceArt: null }))
+      .then((data) => setBalanceArt(data.balanceArt));
+  }, []);
 
   useEffect(() => {
     fetch(`/api/artisans/${id}`)
@@ -85,7 +92,7 @@ export default function BookPage() {
         {step === 3 && (
           <EscrowStep
             sel={sel} onBack={() => setStep(2)} onPay={pay} paying={paying} error={payError}
-            amountNaira={amountNaira} setAmountNaira={setAmountNaira}
+            amountNaira={amountNaira} setAmountNaira={setAmountNaira} balanceArt={balanceArt}
           />
         )}
       </div>
