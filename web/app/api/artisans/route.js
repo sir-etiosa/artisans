@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { and, desc, eq, ilike, or } from "drizzle-orm";
+import { and, desc, eq, ilike, isNull, or } from "drizzle-orm";
 import { db } from "@/db";
 import { artisanProfiles, users } from "@/db/schema";
 import { shapeArtisan } from "@/lib/artisans/shape-artisan";
@@ -18,7 +18,7 @@ export async function GET(request) {
   // Having a row in artisan_profiles (via the join below) is what makes
   // someone an artisan — not the account's `role`, since any account can
   // create a profile once verified.
-  const conditions = [];
+  const conditions = [isNull(artisanProfiles.deletedAt)];
   if (trade && trade !== "All") conditions.push(eq(artisanProfiles.trade, trade));
   if (q) {
     conditions.push(

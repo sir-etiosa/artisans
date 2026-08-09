@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { db } from "@/db";
 import { artisanProfiles, users } from "@/db/schema";
 import { shapeArtisan } from "@/lib/artisans/shape-artisan";
@@ -29,7 +29,7 @@ export async function GET(request, { params }) {
     })
     .from(artisanProfiles)
     .innerJoin(users, eq(users.id, artisanProfiles.userId))
-    .where(eq(users.id, id));
+    .where(and(eq(users.id, id), isNull(artisanProfiles.deletedAt)));
 
   if (!row) return NextResponse.json({ error: "Not found" }, { status: 404 });
 

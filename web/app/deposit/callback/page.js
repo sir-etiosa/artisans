@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Btn, Seal } from "@/components/ui";
+import { Btn, Seal, Logo } from "@/components/ui";
 import { MUTED } from "@/lib/theme";
 
 const MESSAGES = {
@@ -36,7 +36,8 @@ function CallbackInner() {
   return (
     <main className="max-w-lg mx-auto px-4 md:px-8 pt-16">
       <div className="card soft p-8 text-center fade">
-        <div className="flex justify-center"><Seal size={72} value={status === "checking" ? "…" : "✓"} label="THE ARTISANS • DEPOSIT • " /></div>
+        <div className="flex justify-center"><Logo size={40} /></div>
+        <div className="flex justify-center mt-4"><Seal size={72} value={status === "checking" ? "…" : "✓"} label="THE ARTISANS • DEPOSIT • " /></div>
         <h1 className="disp font-bold mt-5" style={{ fontSize: "1.8rem" }}>{title}</h1>
         <p className="mt-2 text-[15px]" style={{ color: MUTED }}>{body}</p>
         <div className="flex justify-center mt-7">

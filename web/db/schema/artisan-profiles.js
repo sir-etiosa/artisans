@@ -6,7 +6,11 @@ import { users } from "./users";
 // deliberately absent for now; that's the profile-redesign work.
 export const artisanProfiles = pgTable("artisan_profiles", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+  // Not DB-unique on purpose — soft-deleting (deletedAt) and re-creating
+  // must be possible, so "one active profile per user" is enforced in the
+  // API instead (see app/api/artisan-profiles/route.js).
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  deletedAt: timestamp("deleted_at", { withTimezone: true }),
   trade: text("trade").notNull(),
   tagline: text("tagline"),
   area: text("area"),

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { db } from "@/db";
 import { artisanProfiles, users } from "@/db/schema";
 import { getSession } from "@/lib/auth/session";
@@ -30,7 +30,9 @@ export async function POST(request) {
     return NextResponse.json({ error: "Verify your identity before creating an artisan profile" }, { status: 403 });
   }
 
-  const existing = await db.query.artisanProfiles.findFirst({ where: eq(artisanProfiles.userId, user.id) });
+  const existing = await db.query.artisanProfiles.findFirst({
+    where: and(eq(artisanProfiles.userId, user.id), isNull(artisanProfiles.deletedAt)),
+  });
   if (existing) return NextResponse.json({ error: "You already have an artisan profile" }, { status: 409 });
 
   const parsed = createSchema.safeParse(await request.json().catch(() => null));
