@@ -15,7 +15,7 @@ export function useAuthForm() {
   const searchParams = useSearchParams();
   const urlError = URL_ERROR_MESSAGES[searchParams.get("error")] || null;
 
-  const [authTab, setAuthTab] = useState("signup");
+  const [authTab, setAuthTab] = useState(searchParams.get("tab") === "login" ? "login" : "signup");
   const [role, setRole] = useState("customer");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");

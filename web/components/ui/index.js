@@ -9,3 +9,4 @@ export { default as Meter } from "./Meter";
 export { default as CredentialCard } from "./CredentialCard";
 export { default as Pagination } from "./Pagination";
 export { default as CategoryTileGrid } from "./CategoryTileGrid";
+export { default as SocialIcons } from "./SocialIcons";
