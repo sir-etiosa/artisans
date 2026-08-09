@@ -10,6 +10,7 @@ import CreateProfileForm from "./_components/CreateProfileForm";
 import BookingRequests from "./_components/BookingRequests";
 import ProfileCard from "./_components/ProfileCard";
 import GoodsSection from "./_components/GoodsSection";
+import CustomerBookings from "./_components/CustomerBookings";
 
 export default function DashboardPage() {
   const { user } = useCurrentUser();
@@ -17,6 +18,7 @@ export default function DashboardPage() {
 
   const requests = ownArtisanProfileId ? bookings.filter((b) => b.artisanProfileId === ownArtisanProfileId) : [];
   const newCount = requests.filter((r) => r.status === "pending").length;
+  const myBookings = user ? bookings.filter((b) => b.customerId === user.id) : [];
 
   const stats = profile
     ? [
@@ -45,6 +47,12 @@ export default function DashboardPage() {
           </span>
         )}
       </div>
+
+      {user && (
+        <div className="mt-6">
+          <CustomerBookings bookings={myBookings} onChanged={reload} />
+        </div>
+      )}
 
       {profile === undefined && <p className="mt-6 text-[14px]" style={{ color: MUTED }}>Loading…</p>}
 

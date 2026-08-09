@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { eq, or, desc } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/db";
 import { bookings, artisanProfiles, users } from "@/db/schema";
 import { getSession } from "@/lib/auth/session";
@@ -12,6 +13,7 @@ const createSchema = z.object({
   scheduledDate: z.string().trim().max(40).optional(),
   scheduledTime: z.string().trim().max(20).optional(),
   amount: z.string().trim().max(60).optional(),
+  amountNaira: z.coerce.number().int().positive("Enter the agreed price"),
 });
 
 export async function POST(request) {
@@ -45,6 +47,7 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
 
   const ownProfile = await db.query.artisanProfiles.findFirst({ where: eq(artisanProfiles.userId, session.userId) });
+  const artisanUser = alias(users, "artisan_user");
 
   const rows = await db
     .select({
@@ -52,16 +55,23 @@ export async function GET() {
       customerId: bookings.customerId,
       customerName: users.fullName,
       artisanProfileId: bookings.artisanProfileId,
+      artisanUserId: artisanUser.id,
+      artisanName: artisanUser.fullName,
       jobDescription: bookings.jobDescription,
       address: bookings.address,
       scheduledDate: bookings.scheduledDate,
       scheduledTime: bookings.scheduledTime,
       amount: bookings.amount,
+      amountNaira: bookings.amountNaira,
+      platformFeeNaira: bookings.platformFeeNaira,
+      payoutNaira: bookings.payoutNaira,
       status: bookings.status,
       createdAt: bookings.createdAt,
     })
     .from(bookings)
     .innerJoin(users, eq(users.id, bookings.customerId))
+    .innerJoin(artisanProfiles, eq(artisanProfiles.id, bookings.artisanProfileId))
+    .innerJoin(artisanUser, eq(artisanUser.id, artisanProfiles.userId))
     .where(
       ownProfile
         ? or(eq(bookings.customerId, session.userId), eq(bookings.artisanProfileId, ownProfile.id))

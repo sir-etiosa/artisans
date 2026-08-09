@@ -16,13 +16,21 @@ export default function BookPage() {
   const [sel, setSel] = useState(undefined);
   const [step, setStep] = useState(1);
   const [job, setJob] = useState({ desc: "", date: "", time: "10:00", addr: "" });
+  const [amountNaira, setAmountNaira] = useState("");
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState(null);
 
   useEffect(() => {
     fetch(`/api/artisans/${id}`)
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => setSel(data?.artisan ?? null));
+      .then((data) => {
+        setSel(data?.artisan ?? null);
+        // Prefill from the artisan's advertised rate as a starting guess —
+        // still editable, since the real agreed price is what the fee is
+        // computed from, not the advertised rate text.
+        const digits = data?.artisan?.rate?.replace(/[^0-9]/g, "");
+        if (digits) setAmountNaira(digits);
+      });
   }, [id]);
 
   if (sel === undefined) {
@@ -52,6 +60,7 @@ export default function BookPage() {
           scheduledDate: job.date,
           scheduledTime: job.time,
           amount: sel.rate?.replace("From ", ""),
+          amountNaira,
         }),
       });
       const data = await res.json();
@@ -73,7 +82,12 @@ export default function BookPage() {
         <ArtisanHeader sel={sel} />
         {step === 1 && <JobDetailsStep sel={sel} job={job} setJob={setJob} onContinue={() => setStep(2)} />}
         {step === 2 && <ScheduleStep sel={sel} job={job} setJob={setJob} onBack={() => setStep(1)} onContinue={() => setStep(3)} />}
-        {step === 3 && <EscrowStep sel={sel} onBack={() => setStep(2)} onPay={pay} paying={paying} error={payError} />}
+        {step === 3 && (
+          <EscrowStep
+            sel={sel} onBack={() => setStep(2)} onPay={pay} paying={paying} error={payError}
+            amountNaira={amountNaira} setAmountNaira={setAmountNaira}
+          />
+        )}
       </div>
     </main>
   );

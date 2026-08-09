@@ -53,6 +53,11 @@ export default function BookingRequests({ requests, onChanged }) {
                 {r.scheduledDate || "Date TBD"} · {r.scheduledTime} · <b style={{ color: INK }}>{r.amount || "—"}</b> ·{" "}
                 <span style={{ color: PINE }}>{r.status === "pending" ? "in escrow ✓" : r.status}</span>
               </p>
+              {r.status === "completed" && r.payoutNaira != null && (
+                <p className="text-[13px] mt-0.5" style={{ color: MUTED }}>
+                  You received <b style={{ color: INK }}>₦{r.payoutNaira.toLocaleString()}</b> after our ₦{r.platformFeeNaira.toLocaleString()} platform fee
+                </p>
+              )}
             </div>
             <div className="flex gap-2">
               {r.status === "pending" && (

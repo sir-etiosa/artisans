@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { bookings, artisanProfiles } from "@/db/schema";
 import { getSession } from "@/lib/auth/session";
 import { logAuditEvent } from "@/lib/audit/log-event";
+import { computeBookingFee } from "@/lib/booking/fee";
 
 const updateSchema = z.object({ status: z.enum(["accepted", "declined", "completed", "cancelled"]) });
 
@@ -36,19 +37,24 @@ export async function PATCH(request, { params }) {
     }
   }
 
+  // Fee is computed and locked in only on an actual completion — never on
+  // pending/declined/cancelled, and only from this job's own agreed price.
+  const fee = status === "completed" && booking.amountNaira != null ? computeBookingFee(booking.amountNaira) : null;
+
   const [updated] = await db
     .update(bookings)
     .set({
       status,
       respondedAt: status === "accepted" || status === "declined" ? new Date() : booking.respondedAt,
       completedAt: status === "completed" ? new Date() : booking.completedAt,
+      ...(fee && { platformFeeNaira: fee.platformFeeNaira, payoutNaira: fee.payoutNaira }),
     })
     .where(eq(bookings.id, id))
     .returning();
 
   await logAuditEvent({
     actorUserId: session.userId, eventType: "booking_status_changed", targetType: "booking", targetId: id,
-    metadata: { from: booking.status, to: status },
+    metadata: { from: booking.status, to: status, ...(fee && { amountNaira: booking.amountNaira, ...fee }) },
   });
 
   return NextResponse.json({ booking: updated });
