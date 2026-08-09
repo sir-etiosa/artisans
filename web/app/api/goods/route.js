@@ -6,7 +6,7 @@ import { goodsListings, artisanProfiles, users } from "@/db/schema";
 import { getSession } from "@/lib/auth/session";
 import { haversineKm } from "@/lib/geo/haversine";
 
-const DEFAULT_PAGE_SIZE = 12;
+const DEFAULT_PAGE_SIZE = 10;
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);

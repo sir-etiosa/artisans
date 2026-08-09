@@ -7,3 +7,4 @@ export { default as Tick } from "./Tick";
 export { default as Stars } from "./Stars";
 export { default as Meter } from "./Meter";
 export { default as CredentialCard } from "./CredentialCard";
+export { default as Pagination } from "./Pagination";

@@ -5,6 +5,8 @@ import { artisanProfiles, users } from "@/db/schema";
 import { shapeArtisan } from "@/lib/artisans/shape-artisan";
 import { haversineKm } from "@/lib/geo/haversine";
 
+const DEFAULT_PAGE_SIZE = 10;
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const trade = searchParams.get("trade");
@@ -14,6 +16,10 @@ export async function GET(request) {
   // rather than faked.
   const custLat = searchParams.get("lat") ? Number(searchParams.get("lat")) : null;
   const custLng = searchParams.get("lng") ? Number(searchParams.get("lng")) : null;
+  const maxKm = searchParams.get("maxKm") ? Number(searchParams.get("maxKm")) : null;
+  const minScore = searchParams.get("minScore") ? Number(searchParams.get("minScore")) : null;
+  const page = Math.max(1, Number(searchParams.get("page")) || 1);
+  const pageSize = Math.min(48, Math.max(1, Number(searchParams.get("pageSize")) || DEFAULT_PAGE_SIZE));
 
   // Having a row in artisan_profiles (via the join below) is what makes
   // someone an artisan — not the account's `role`, since any account can
@@ -47,12 +53,20 @@ export async function GET(request) {
     .where(conditions.length ? and(...conditions) : undefined)
     .orderBy(desc(artisanProfiles.trustScore));
 
-  const withDistance = rows.map((row) => ({
+  let withDistance = rows.map((row) => ({
     ...row,
     km: custLat != null && custLng != null && row.lat != null && row.lng != null
       ? Number(haversineKm(custLat, custLng, row.lat, row.lng).toFixed(1))
       : null,
   }));
 
-  return NextResponse.json({ artisans: withDistance.map(shapeArtisan) });
+  if (maxKm != null) withDistance = withDistance.filter((row) => row.km == null || row.km <= maxKm);
+  if (minScore != null) withDistance = withDistance.filter((row) => row.trustScore >= minScore);
+
+  const total = withDistance.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const start = (page - 1) * pageSize;
+  const items = withDistance.slice(start, start + pageSize);
+
+  return NextResponse.json({ artisans: items.map(shapeArtisan), total, page, pageSize, totalPages });
 }

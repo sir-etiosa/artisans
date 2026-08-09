@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useGeolocation } from "@/lib/geo/useGeolocation";
 
@@ -12,7 +12,9 @@ export function useSearchFilters() {
   const [query] = useState(() => searchParams.get("q") || "");
   const [maxKm, setMaxKm] = useState(5);
   const [minScore, setMinScore] = useState(80);
+  const [page, setPage] = useState(1);
   const [artisans, setArtisans] = useState([]);
+  const [pageInfo, setPageInfo] = useState({ total: 0, totalPages: 1 });
   const [availableTrades, setAvailableTrades] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -35,24 +37,32 @@ export function useSearchFilters() {
       params.set("lat", coords.lat);
       params.set("lng", coords.lng);
     }
+    params.set("maxKm", maxKm);
+    params.set("minScore", minScore);
+    params.set("page", page);
     fetch(`/api/artisans?${params}`)
-      .then((res) => (res.ok ? res.json() : { artisans: [] }))
-      .then((data) => setArtisans(data.artisans))
+      .then((res) => (res.ok ? res.json() : { artisans: [], total: 0, totalPages: 1 }))
+      .then((data) => {
+        setArtisans(data.artisans);
+        setPageInfo({ total: data.total, totalPages: data.totalPages });
+      })
       .finally(() => setLoading(false));
-  }, [trade, query, geoStatus, coords]);
+  }, [trade, query, geoStatus, coords, maxKm, minScore, page]);
 
   const changeTrade = (t) => {
     setLoading(true);
+    setPage(1);
     setTrade(t);
   };
 
-  // Distance is unknown (not zero) for artisans who never granted location
-  // when setting up their profile — don't filter those out just because we
-  // can't compute a number, or a customer with location off would see nothing.
-  const results = useMemo(
-    () => artisans.filter((a) => (a.km == null || a.km <= maxKm) && a.score >= minScore),
-    [artisans, maxKm, minScore]
-  );
+  const changeMaxKm = (v) => { setPage(1); setMaxKm(v); };
+  const changeMinScore = (v) => { setPage(1); setMinScore(v); };
 
-  return { trade, setTrade: changeTrade, maxKm, setMaxKm, minScore, setMinScore, results, availableTrades, loading, geoStatus };
+  return {
+    trade, setTrade: changeTrade,
+    maxKm, setMaxKm: changeMaxKm,
+    minScore, setMinScore: changeMinScore,
+    results: artisans, availableTrades, loading, geoStatus,
+    page, setPage, totalPages: pageInfo.totalPages, total: pageInfo.total,
+  };
 }

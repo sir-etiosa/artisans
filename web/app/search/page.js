@@ -3,13 +3,17 @@
 import { Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { MIST, MUTED, PINE } from "@/lib/theme";
+import { Pagination } from "@/components/ui";
 import { useSearchFilters } from "./_hooks/useSearchFilters";
 import FilterBar from "./_components/FilterBar";
 import ResultCard from "./_components/ResultCard";
 
 function ResultsInner() {
   const router = useRouter();
-  const { trade, setTrade, maxKm, setMaxKm, minScore, setMinScore, results, availableTrades, loading, geoStatus } = useSearchFilters();
+  const {
+    trade, setTrade, maxKm, setMaxKm, minScore, setMinScore,
+    results, availableTrades, loading, geoStatus, page, setPage, totalPages, total,
+  } = useSearchFilters();
 
   return (
     <main className="max-w-6xl mx-auto px-4 md:px-8 pt-8">
@@ -21,7 +25,7 @@ function ResultsInner() {
             {geoStatus === "granted" ? "near you" : "· enable location for distance"}
           </span>
         </h1>
-        <span className="text-sm font-semibold px-3 py-1 rounded-full" style={{ background: MIST }}>{results.length} match{results.length === 1 ? "" : "es"}</span>
+        <span className="text-sm font-semibold px-3 py-1 rounded-full" style={{ background: MIST }}>{total} match{total === 1 ? "" : "es"}</span>
       </div>
 
       <FilterBar trade={trade} setTrade={setTrade} availableTrades={availableTrades} maxKm={maxKm} setMaxKm={setMaxKm} minScore={minScore} setMinScore={setMinScore} />
@@ -35,6 +39,8 @@ function ResultsInner() {
         )}
         {!loading && results.map((a) => <ResultCard key={a.id} a={a} />)}
       </div>
+
+      {!loading && <Pagination page={page} totalPages={totalPages} onChange={setPage} />}
     </main>
   );
 }
