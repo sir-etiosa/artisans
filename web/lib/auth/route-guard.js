@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { SESSION_COOKIE_NAME, verifySessionToken } from "./jwt";
 
-const PUBLIC_PATHS = ["/auth", "/verify-email", "/forgot-password", "/reset-password", "/privacy"];
+const PUBLIC_PATHS = [
+  "/auth", "/verify-email", "/forgot-password", "/reset-password", "/privacy",
+  // Browsing before signup — anyone can look, only booking/posting/messaging
+  // etc. require an account.
+  "/", "/search", "/goods", "/artisan",
+];
 
 function isPublic(pathname) {
   return (
@@ -9,7 +14,14 @@ function isPublic(pathname) {
     pathname.startsWith("/api/auth") ||
     // Server-to-server callback — no session cookie exists to check.
     // Authenticity is verified inside the route via the HMAC signature header.
-    pathname === "/api/paystack/webhook"
+    pathname === "/api/paystack/webhook" ||
+    // Public browse endpoints — anyone can look before signing up. Routes
+    // under these that DO require a session (posting, editing, deleting)
+    // check getSession() themselves and return 401, same as every other
+    // protected route; this only stops the middleware force-redirecting
+    // logged-out browsing to /auth.
+    pathname.startsWith("/api/artisans") ||
+    pathname.startsWith("/api/goods")
   );
 }
 
