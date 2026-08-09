@@ -15,7 +15,7 @@ export default function PrivacyPolicyPage() {
     <main className="max-w-2xl mx-auto px-4 md:px-8 pt-8 pb-16">
       <Link href="/" className="text-sm font-semibold underline" style={{ color: PINE }}>← Back</Link>
       <h1 className="disp font-bold mt-3" style={{ fontSize: "clamp(1.7rem,4vw,2.2rem)" }}>Privacy Policy</h1>
-      <p className="mt-2 text-[13px]" style={{ color: MUTED }}>Last updated 2026-08-08</p>
+      <p className="mt-2 text-[13px]" style={{ color: MUTED }}>Last updated 2026-08-09</p>
 
       <div className="mt-6 pt-2" style={{ borderTop: `1px solid ${LINE}` }}>
         <Section title="What we collect">
@@ -24,8 +24,7 @@ export default function PrivacyPolicyPage() {
         </Section>
 
         <Section title="Why we collect it">
-          Identity details are used only to verify who you are, through our verification partner Cleanverse and,
-          for a final check, a brief human review on our side. We don&apos;t use this information for advertising or
+          Identity details are used only to verify who you are. We don&apos;t use this information for advertising or
           share it with anyone outside of what&apos;s needed to verify your identity.
         </Section>
 
