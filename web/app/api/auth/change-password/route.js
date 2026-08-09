@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { getSession } from "@/lib/auth/session";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
+import { logAuditEvent } from "@/lib/audit/log-event";
 
 const schema = z.object({
   currentPassword: z.string().min(1),
@@ -31,6 +32,8 @@ export async function POST(request) {
 
   const passwordHash = await hashPassword(newPassword);
   await db.update(users).set({ passwordHash }).where(eq(users.id, user.id));
+
+  await logAuditEvent({ actorUserId: user.id, actorEmail: user.email, eventType: "password_change", targetType: "user", targetId: user.id });
 
   return NextResponse.json({ ok: true });
 }

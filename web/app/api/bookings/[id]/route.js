@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { bookings, artisanProfiles } from "@/db/schema";
 import { getSession } from "@/lib/auth/session";
+import { logAuditEvent } from "@/lib/audit/log-event";
 
 const updateSchema = z.object({ status: z.enum(["accepted", "declined", "completed", "cancelled"]) });
 
@@ -44,6 +45,11 @@ export async function PATCH(request, { params }) {
     })
     .where(eq(bookings.id, id))
     .returning();
+
+  await logAuditEvent({
+    actorUserId: session.userId, eventType: "booking_status_changed", targetType: "booking", targetId: id,
+    metadata: { from: booking.status, to: status },
+  });
 
   return NextResponse.json({ booking: updated });
 }

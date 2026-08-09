@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { verifyPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
+import { logAuditEvent } from "@/lib/audit/log-event";
 
 const loginSchema = z.object({
   email: z.string().trim().toLowerCase().email(),
@@ -23,6 +24,7 @@ export async function POST(request) {
 
   const user = await db.query.users.findFirst({ where: eq(users.email, email) });
   if (!user || !(await verifyPassword(password, user.passwordHash))) {
+    await logAuditEvent({ actorEmail: email, eventType: "login_failed", targetType: "user", targetId: user?.id || null });
     return NextResponse.json(INVALID_CREDENTIALS, { status: 401 });
   }
 
@@ -31,6 +33,7 @@ export async function POST(request) {
   }
 
   await createSession({ userId: user.id, role: user.role });
+  await logAuditEvent({ actorUserId: user.id, actorEmail: user.email, eventType: "login", targetType: "user", targetId: user.id });
 
   const redirectTo = user.walletAddress ? (user.role === "artisan" ? "/dashboard" : "/") : "/activate";
   return NextResponse.json({ ok: true, redirectTo });

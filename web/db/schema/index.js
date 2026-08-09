@@ -10,3 +10,4 @@ export * from "./deposits";
 export * from "./bank-accounts";
 export * from "./withdrawals";
 export * from "./goods-listings";
+export * from "./audit-logs";

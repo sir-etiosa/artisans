@@ -6,6 +6,7 @@ import { users, verificationTokens } from "@/db/schema";
 import { hashPassword } from "@/lib/auth/password";
 import { generateToken, expiresInMinutes } from "@/lib/auth/token";
 import { sendVerificationEmail } from "@/lib/email/send-verification-email";
+import { logAuditEvent } from "@/lib/audit/log-event";
 
 const signupSchema = z.object({
   fullName: z.string().trim().min(2, "Full name is too short"),
@@ -42,6 +43,8 @@ export async function POST(request) {
   });
 
   await sendVerificationEmail({ to: email, name: fullName, token });
+
+  await logAuditEvent({ actorUserId: user.id, actorEmail: email, eventType: "signup", targetType: "user", targetId: user.id, metadata: { role } });
 
   return NextResponse.json({ ok: true });
 }

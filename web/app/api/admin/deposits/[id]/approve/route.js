@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { deposits, users } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { sendArtToUser, isArtTokenConfigured, koboToArt } from "@/lib/art/send-art";
+import { logAuditEvent } from "@/lib/audit/log-event";
 
 export async function POST(request, { params }) {
   const guard = await requireAdmin(["tx"]);
@@ -28,6 +29,12 @@ export async function POST(request, { params }) {
     .set({ status: "credited", creditedBy: guard.user.id, creditedAt: new Date(), artTxHash: sendResult.txHash })
     .where(eq(deposits.id, id))
     .returning();
+
+  await logAuditEvent({
+    actorUserId: guard.user.id, actorEmail: guard.user.email,
+    eventType: "deposit_approved", targetType: "deposit", targetId: id,
+    metadata: { depositUserId: deposit.userId, amountKobo: deposit.amountKobo, artTxHash: sendResult.txHash },
+  });
 
   return NextResponse.json({ deposit: updated });
 }

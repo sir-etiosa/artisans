@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { users, passwordResetTokens } from "@/db/schema";
 import { hashPassword } from "@/lib/auth/password";
+import { logAuditEvent } from "@/lib/audit/log-event";
 
 const schema = z.object({
   token: z.string().min(1),
@@ -26,6 +27,8 @@ export async function POST(request) {
   const passwordHash = await hashPassword(password);
   await db.update(users).set({ passwordHash }).where(eq(users.id, record.userId));
   await db.delete(passwordResetTokens).where(eq(passwordResetTokens.id, record.id));
+
+  await logAuditEvent({ actorUserId: record.userId, eventType: "password_reset", targetType: "user", targetId: record.userId });
 
   return NextResponse.json({ ok: true });
 }

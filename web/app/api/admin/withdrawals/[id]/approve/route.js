@@ -6,6 +6,7 @@ import { withdrawals, bankAccounts, users } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { isArtTokenConfigured, returnArtToTreasury } from "@/lib/art/send-art";
 import { createTransferRecipient, initiateTransfer } from "@/lib/paystack/client";
+import { logAuditEvent } from "@/lib/audit/log-event";
 
 export async function POST(request, { params }) {
   const guard = await requireAdmin(["tx"]);
@@ -62,6 +63,12 @@ export async function POST(request, { params }) {
     })
     .where(eq(withdrawals.id, id))
     .returning();
+
+  await logAuditEvent({
+    actorUserId: guard.user.id, actorEmail: guard.user.email,
+    eventType: "withdrawal_approved", targetType: "withdrawal", targetId: id,
+    metadata: { withdrawalUserId: withdrawal.userId, amountKobo: withdrawal.amountKobo, artTxHash: artResult.txHash, transferRef },
+  });
 
   return NextResponse.json({ withdrawal: updated });
 }

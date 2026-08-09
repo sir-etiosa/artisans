@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { verificationReviews, users } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { updateApassStatus, queryApass, normalizeApassStatus } from "@/lib/cleanverse/apass";
+import { logAuditEvent } from "@/lib/audit/log-event";
 
 const decideSchema = z.object({
   decision: z.enum(["approved", "rejected"]),
@@ -59,6 +60,12 @@ export async function POST(request, { params }) {
     .update(verificationReviews)
     .set({ reviewStatus: parsed.data.decision, reviewedBy: guard.user.id, reviewedAt: new Date(), reviewNote: parsed.data.note })
     .where(eq(verificationReviews.id, id));
+
+  await logAuditEvent({
+    actorUserId: guard.user.id, actorEmail: guard.user.email,
+    eventType: `verification_${parsed.data.decision}`, targetType: "user", targetId: user.id,
+    metadata: { reviewId: id, note: parsed.data.note || null },
+  });
 
   return NextResponse.json({ ok: true });
 }
