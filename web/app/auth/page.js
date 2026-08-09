@@ -29,7 +29,7 @@ function AuthInner() {
             {form.authTab === "signup" ? "Join The Artisans" : "Welcome back"}
           </h2>
           <p className="mt-1.5" style={{ color: MUTED }}>
-            {form.authTab === "signup" ? "Two minutes now, a lifetime of not asking your cousin for “a guy.”" : "Your bookings and chats are where you left them."}
+            {form.authTab === "signup" ? "Online marketplace for services" : "Your bookings and chats are where you left them."}
           </p>
 
           {form.authTab === "signup" && <RoleChoice role={form.role} onChange={form.setRole} />}
