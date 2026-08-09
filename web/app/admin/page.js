@@ -43,7 +43,16 @@ export default function AdminHubPage() {
           style={{ opacity: canApproveDeposits ? 1 : 0.4, pointerEvents: canApproveDeposits ? "auto" : "none" }}>
           <h2 className="disp font-bold text-[16px]">Deposit approval</h2>
           <p className="text-[13px] mt-1" style={{ color: MUTED }}>
-            Paystack-confirmed deposits waiting for ART to be sent. ART transfer itself is still a stub until the token is deployed.
+            Paystack-confirmed deposits waiting for ART to be sent. ART is deployed; sending is still a stub until the operator wallet is set up.
+          </p>
+        </a>
+
+        <a href={canApproveDeposits ? "/admin/withdrawals" : undefined}
+          className="card soft p-5 block"
+          style={{ opacity: canApproveDeposits ? 1 : 0.4, pointerEvents: canApproveDeposits ? "auto" : "none" }}>
+          <h2 className="disp font-bold text-[16px]">Withdrawal approval</h2>
+          <p className="text-[13px] mt-1" style={{ color: MUTED }}>
+            Requests waiting for ART to return to treasury and a real Paystack payout.
           </p>
         </a>
       </div>

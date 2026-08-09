@@ -7,3 +7,5 @@ export * from "./artisan-profiles";
 export * from "./verification-reviews";
 export * from "./bookings";
 export * from "./deposits";
+export * from "./bank-accounts";
+export * from "./withdrawals";

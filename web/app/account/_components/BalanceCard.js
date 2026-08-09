@@ -15,7 +15,9 @@ export default function BalanceCard({ user }) {
         <Link href={verified ? "/deposit" : "#"} aria-disabled={!verified} style={{ pointerEvents: verified ? "auto" : "none" }}>
           <Btn primary small style={{ opacity: verified ? 1 : 0.4 }}>Deposit</Btn>
         </Link>
-        <Btn small disabled style={{ opacity: 0.4 }}>Withdraw (soon)</Btn>
+        <Link href={verified ? "/withdraw" : "#"} aria-disabled={!verified} style={{ pointerEvents: verified ? "auto" : "none" }}>
+          <Btn small style={{ opacity: verified ? 1 : 0.4 }}>Withdraw</Btn>
+        </Link>
       </div>
     </section>
   );
