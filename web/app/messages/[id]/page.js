@@ -19,7 +19,6 @@ export default function ThreadPage() {
 
       <div className="flex items-center gap-2 mt-3 pb-4" style={{ borderBottom: `1px solid ${LINE}` }}>
         <h1 className="disp font-bold text-xl">{conversation?.other?.fullName || "…"}</h1>
-        {conversation?.other?.email && <span className="text-[13px]" style={{ color: MUTED }}>· {conversation.other.email}</span>}
       </div>
 
       <div className="flex-1 space-y-3 py-4 overflow-y-auto">

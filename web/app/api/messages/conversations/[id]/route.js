@@ -20,7 +20,7 @@ export async function GET(request, { params }) {
   // These three don't depend on each other's results, so run them together
   // instead of paying for a round trip each.
   const [[other], thread] = await Promise.all([
-    db.select({ id: users.id, fullName: users.fullName, email: users.email }).from(users).where(eq(users.id, otherId)),
+    db.select({ id: users.id, fullName: users.fullName }).from(users).where(eq(users.id, otherId)),
     db.query.messages.findMany({ where: eq(messages.conversationId, id), orderBy: asc(messages.createdAt) }),
     db
       .update(messages)

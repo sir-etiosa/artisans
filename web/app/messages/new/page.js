@@ -43,7 +43,7 @@ export default function NewMessagePage() {
             style={{ opacity: starting && starting !== u.id ? 0.5 : 1 }}>
             <div>
               <p className="font-semibold text-[15px]">{u.fullName}</p>
-              <p className="text-[13px]" style={{ color: MUTED }}>{u.email} · {u.role === "artisan" ? "Artisan" : "Customer"}</p>
+              <p className="text-[13px]" style={{ color: MUTED }}>{u.role === "artisan" ? "Artisan" : "Customer"}</p>
             </div>
             <span className="text-[13px] font-semibold" style={{ color: PINE }}>{starting === u.id ? "Starting…" : "Message"}</span>
           </button>

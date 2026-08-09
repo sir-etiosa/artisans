@@ -13,7 +13,7 @@ export async function GET() {
   }
 
   const rows = await db
-    .select({ id: users.id, fullName: users.fullName, email: users.email, role: users.role })
+    .select({ id: users.id, fullName: users.fullName, role: users.role })
     .from(users)
     .where(ne(users.id, session.userId));
 
