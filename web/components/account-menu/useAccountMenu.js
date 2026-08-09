@@ -34,6 +34,7 @@ export function useAccountMenu() {
   const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/auth");
+    router.refresh();
   };
 
   return { rootRef, open, setOpen, user, logout };

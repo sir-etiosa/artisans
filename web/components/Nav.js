@@ -6,16 +6,17 @@ import { Logo } from "@/components/ui";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
 import AccountMenu from "@/components/account-menu/AccountMenu";
-import { useCurrentUser } from "@/lib/auth/useCurrentUser";
 import { PAPER, LINE, INK, MUTED } from "@/lib/theme";
 
 export default function Nav({ initialDark = false, initialLoggedIn = false }) {
   const pathname = usePathname();
-  const { user, loading } = useCurrentUser();
-  // Trust the server-verified session until the client fetch resolves —
-  // otherwise this briefly renders logged-out chrome (Log in/Sign up, no
-  // icons) on every load before flipping to the real state a moment later.
-  const loggedIn = loading ? initialLoggedIn : Boolean(user);
+  // Comes straight from the server (layout.js verifies the session cookie
+  // on every real navigation), not a client fetch — a client fetch only
+  // resolves once and then goes stale the moment login/logout changes the
+  // cookie under it. router.refresh() after login/logout re-runs layout.js
+  // and hands down a fresh value here, which is what actually keeps this
+  // in sync without a manual page reload.
+  const loggedIn = initialLoggedIn;
 
   /* auth screen has its own full-bleed layout — just float the theme toggle */
   if (pathname === "/auth") return <ThemeToggle floating initialDark={initialDark} />;

@@ -52,6 +52,11 @@ export function useAuthForm() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Something went wrong");
         router.push(data.redirectTo || "/");
+        // router.push alone is a client-side transition — layout.js (which
+        // computes Nav's logged-in state from the session cookie) won't
+        // re-run on the server, so Nav would keep showing "Log in / Sign
+        // up" until a hard refresh. refresh() re-runs it in place.
+        router.refresh();
       }
     } catch (err) {
       setError(err.message);
