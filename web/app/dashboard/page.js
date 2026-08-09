@@ -8,6 +8,7 @@ import { useCurrentUser } from "@/lib/auth/useCurrentUser";
 import { useDashboard } from "./_hooks/useDashboard";
 import CreateProfileForm from "./_components/CreateProfileForm";
 import BookingRequests from "./_components/BookingRequests";
+import ProfileCard from "./_components/ProfileCard";
 
 export default function DashboardPage() {
   const { user } = useCurrentUser();
@@ -76,16 +77,7 @@ export default function DashboardPage() {
           <div className="grid lg:grid-cols-3 gap-5 mt-6 items-start">
             <BookingRequests requests={requests} onChanged={reload} />
 
-            <section className="card soft p-6">
-              <h2 className="disp font-bold text-[17px]">Your profile</h2>
-              <dl className="mt-4 space-y-2.5 text-[13px]">
-                <div className="flex justify-between"><dt style={{ color: MUTED }}>Trade</dt><dd className="font-medium">{profile.trade}</dd></div>
-                <div className="flex justify-between"><dt style={{ color: MUTED }}>Area</dt><dd className="font-medium">{profile.area || "—"}</dd></div>
-                <div className="flex justify-between"><dt style={{ color: MUTED }}>Rate</dt><dd className="font-medium">{profile.rate || "—"}</dd></div>
-                <div className="flex justify-between"><dt style={{ color: MUTED }}>Years experience</dt><dd className="font-medium">{profile.yearsExperience ?? "—"}</dd></div>
-                <div className="flex justify-between"><dt style={{ color: MUTED }}>Location on file</dt><dd className="font-medium">{profile.lat != null ? "Yes" : "Not set"}</dd></div>
-              </dl>
-            </section>
+            <ProfileCard profile={profile} onChanged={reload} />
           </div>
         </>
       )}
