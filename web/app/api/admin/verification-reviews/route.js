@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { verificationReviews, users } from "@/db/schema";
-import { requireStaff } from "@/lib/auth/require-staff";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
 export async function GET(request) {
-  const guard = await requireStaff();
+  const guard = await requireAdmin(["support"]);
   if (guard.error) return NextResponse.json({ error: guard.error }, { status: guard.status });
 
   const url = new URL(request.url);

@@ -13,9 +13,10 @@ export const users = pgTable("users", {
   // AES-256-GCM ciphertext (iv+authTag+ciphertext, base64) — never sent to
   // the client. See lib/crypto/secret.js.
   walletPrivateKeyEnc: text("wallet_private_key_enc"),
-  // Internal customer-care role — gates /admin routes. No self-serve UI to
-  // grant this; flipped directly in the DB for now.
-  isStaff: boolean("is_staff").notNull().default(false),
+  // Internal admin role — gates /admin routes. "support" (identity review),
+  // "tx" (deposit/treasury review), "full" (both). Null = not an admin. No
+  // self-serve UI to grant this; set directly in the DB for now.
+  adminRole: text("admin_role"),
   // Cleanverse on-chain verification (A-Pass), Monad-only for now — see
   // lib/cleanverse/. "not_connected" until real sandbox credentials exist.
   verificationStatus: text("verification_status").notNull().default("not_connected"),

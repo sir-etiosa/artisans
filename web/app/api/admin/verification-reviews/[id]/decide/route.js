@@ -3,7 +3,7 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { verificationReviews, users } from "@/db/schema";
-import { requireStaff } from "@/lib/auth/require-staff";
+import { requireAdmin } from "@/lib/auth/require-admin";
 import { updateApassStatus, queryApass, normalizeApassStatus } from "@/lib/cleanverse/apass";
 
 const decideSchema = z.object({
@@ -12,7 +12,7 @@ const decideSchema = z.object({
 });
 
 export async function POST(request, { params }) {
-  const guard = await requireStaff();
+  const guard = await requireAdmin(["support"]);
   if (guard.error) return NextResponse.json({ error: guard.error }, { status: guard.status });
 
   const { id } = await params;

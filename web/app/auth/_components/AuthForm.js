@@ -1,9 +1,13 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { Btn } from "@/components/ui";
 import { MUTED, PINE, RED } from "@/lib/theme";
 
 export default function AuthForm({ form }) {
   const { authTab, role, fullName, setFullName, email, setEmail, phone, setPhone, password, setPassword, error, loading, submit } = form;
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <form className="mt-6 space-y-4" onSubmit={submit}>
@@ -28,9 +32,21 @@ export default function AuthForm({ form }) {
       )}
       <div>
         <label className="label" htmlFor="pw">Password</label>
-        <input id="pw" type="password" className="field" placeholder={authTab === "signup" ? "8+ characters" : "Your password"}
-          autoComplete={authTab === "signup" ? "new-password" : "current-password"}
-          value={password} onChange={(e) => setPassword(e.target.value)} required minLength={authTab === "signup" ? 8 : undefined} />
+        <div className="relative">
+          <input id="pw" type={showPassword ? "text" : "password"} className="field" style={{ paddingRight: 56 }}
+            placeholder={authTab === "signup" ? "8+ characters" : "Your password"}
+            autoComplete={authTab === "signup" ? "new-password" : "current-password"}
+            value={password} onChange={(e) => setPassword(e.target.value)} required minLength={authTab === "signup" ? 8 : undefined} />
+          <button
+            type="button"
+            onClick={() => setShowPassword((v) => !v)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] font-semibold underline"
+            style={{ color: PINE }}
+          >
+            {showPassword ? "Hide" : "Show"}
+          </button>
+        </div>
       </div>
       {authTab === "login" && (
         <Link href="/forgot-password" className="inline-block text-[13px] font-semibold underline" style={{ color: PINE }}>Forgot password?</Link>
