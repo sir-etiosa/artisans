@@ -10,7 +10,7 @@ export default function CredentialCard({ a, compact }) {
     <div className="card soft overflow-hidden" style={{ borderColor: `${BRASS}55` }}>
       <div className="px-5 pt-4 pb-3 flex items-center justify-between" style={{ background: FOREST }}>
         <div>
-          <p className="text-[11px] font-semibold tracking-[.16em]" style={{ color: BRASS }}>ARTISANS · VERIFIED</p>
+          <p className="text-[11px] font-semibold tracking-[.16em]" style={{ color: BRASS }}>ARTISAN VERIFIED</p>
           <p className="text-[11px] mt-0.5" style={{ color: "#ffffff99" }}>Member since {a.since}</p>
         </div>
         <Seal size={compact ? 44 : 54} />
