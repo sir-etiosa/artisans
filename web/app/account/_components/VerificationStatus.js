@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Btn } from "@/components/ui";
-import { MUTED, PINE, RED, FOREST, LINE } from "@/lib/theme";
+import { MUTED, PINE, RED, FOREST, BRASS, LINE } from "@/lib/theme";
 
 const LABELS = {
   not_connected: "Not verified",
@@ -21,7 +21,7 @@ const ID_TYPES = [
   { value: "RESIDENCE_PERMIT", label: "Residence permit" },
 ];
 
-export default function VerificationStatus({ status, checkedAt, onUpdate }) {
+export default function VerificationStatus({ status, checkedAt, pending, onUpdate }) {
   const [open, setOpen] = useState(false);
   const [idType, setIdType] = useState("ID_CARD");
   const [fullName, setFullName] = useState("");
@@ -35,8 +35,13 @@ export default function VerificationStatus({ status, checkedAt, onUpdate }) {
   // "frozen" means a staff review rejected this — don't let the account
   // self-serve a resubmit around that; it has to go through support.
   const locked = status === "verified" || status === "frozen";
-  const label = LABELS[status] || LABELS.not_connected;
-  const color = COLORS[status];
+  // Cleanverse can clear instantly, but a human still has to do the
+  // fraud-check pass before this account is really "Verified" — until
+  // that's done, show pending even though the underlying status already
+  // says verified.
+  const showPending = pending && status !== "frozen";
+  const label = showPending ? "Pending review" : LABELS[status] || LABELS.not_connected;
+  const color = showPending ? BRASS : COLORS[status];
 
   const pickImage = (e) => {
     const file = e.target.files?.[0] || null;
