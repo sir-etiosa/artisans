@@ -31,12 +31,11 @@ export default function Nav({ initialDark = false }) {
         <Link href="/" className="hover:underline" style={{ color: isActive("/") ? INK : undefined }}>Find artisans</Link>
         <Link href="/search" className="hover:underline" style={{ color: isActive("/search") ? INK : undefined }}>Browse all</Link>
         <Link href="/goods" className="hover:underline" style={{ color: isActive("/goods") ? INK : undefined }}>Goods</Link>
-        {user && (
-          <>
-            <Link href="/dashboard" className="hover:underline" style={{ color: isActive("/dashboard") ? INK : undefined }}>Artisan dashboard</Link>
-            <Link href="/messages" className="hover:underline" style={{ color: isActive("/messages") ? INK : undefined }}>Messages</Link>
-          </>
-        )}
+        {/* Not gated on `user` — for a logged-out visitor these just bounce
+            to /auth via the route guard, doubling as sign-up/login entry
+            points instead of needing separate buttons. */}
+        <Link href="/dashboard" className="hover:underline" style={{ color: isActive("/dashboard") ? INK : undefined }}>Artisan dashboard</Link>
+        <Link href="/messages" className="hover:underline" style={{ color: isActive("/messages") ? INK : undefined }}>Messages</Link>
       </nav>
       <div className="flex items-center gap-3">
         {user && <NotificationBell />}
