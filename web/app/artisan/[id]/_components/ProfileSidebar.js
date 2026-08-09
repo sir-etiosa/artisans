@@ -16,6 +16,10 @@ export default function ProfileSidebar({ sel }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ otherUserId: sel.id }),
     });
+    if (res.status === 401) {
+      router.push("/auth?tab=login");
+      return;
+    }
     const data = await res.json();
     if (res.ok) router.push(`/messages/${data.conversation.id}`);
     else setMessaging(false);

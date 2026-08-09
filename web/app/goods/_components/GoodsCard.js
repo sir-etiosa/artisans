@@ -17,6 +17,10 @@ export default function GoodsCard({ g }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ otherUserId: g.sellerId }),
       });
+      if (res.status === 401) {
+        router.push("/auth?tab=login");
+        return;
+      }
       const data = await res.json();
       if (res.ok) router.push(`/messages/${data.conversation.id}`);
     } finally {
