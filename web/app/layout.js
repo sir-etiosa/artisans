@@ -4,6 +4,7 @@ import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { THEME_COOKIE_NAME } from "@/lib/theme-mode/cookie";
+import { getSession } from "@/lib/auth/session";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,11 +27,15 @@ export const viewport = {
 export default async function RootLayout({ children }) {
   const cookieStore = await cookies();
   const dark = cookieStore.get(THEME_COOKIE_NAME)?.value === "dark";
+  // Verified server-side so Nav renders the right chrome on first paint —
+  // otherwise the client-side session fetch briefly shows logged-out nav
+  // (Log in/Sign up) before flipping to Messages/Dashboard/account icon.
+  const session = await getSession();
 
   return (
     <html lang="en" className={`${inter.variable}${dark ? " dark" : ""}`}>
       <body className="pb-20">
-        <Nav initialDark={dark} />
+        <Nav initialDark={dark} initialLoggedIn={Boolean(session)} />
         {children}
         <Footer />
       </body>

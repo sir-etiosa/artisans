@@ -9,9 +9,13 @@ import AccountMenu from "@/components/account-menu/AccountMenu";
 import { useCurrentUser } from "@/lib/auth/useCurrentUser";
 import { PAPER, LINE, INK, MUTED } from "@/lib/theme";
 
-export default function Nav({ initialDark = false }) {
+export default function Nav({ initialDark = false, initialLoggedIn = false }) {
   const pathname = usePathname();
-  const { user } = useCurrentUser();
+  const { user, loading } = useCurrentUser();
+  // Trust the server-verified session until the client fetch resolves —
+  // otherwise this briefly renders logged-out chrome (Log in/Sign up, no
+  // icons) on every load before flipping to the real state a moment later.
+  const loggedIn = loading ? initialLoggedIn : Boolean(user);
 
   /* auth screen has its own full-bleed layout — just float the theme toggle */
   if (pathname === "/auth") return <ThemeToggle floating initialDark={initialDark} />;
@@ -31,13 +35,13 @@ export default function Nav({ initialDark = false }) {
         <Link href="/" className="hover:underline" style={{ color: isActive("/") ? INK : undefined }}>Find artisans</Link>
         <Link href="/search" className="hover:underline" style={{ color: isActive("/search") ? INK : undefined }}>Browse all</Link>
         <Link href="/goods" className="hover:underline" style={{ color: isActive("/goods") ? INK : undefined }}>Goods</Link>
-        {user && (
+        {loggedIn && (
           <>
             <Link href="/dashboard" className="hover:underline" style={{ color: isActive("/dashboard") ? INK : undefined }}>Artisan dashboard</Link>
             <Link href="/messages" className="hover:underline" style={{ color: isActive("/messages") ? INK : undefined }}>Messages</Link>
           </>
         )}
-        {!user && (
+        {!loggedIn && (
           <>
             <Link href="/auth?tab=login" className="hover:underline">Log in</Link>
             <Link href="/auth" className="hover:underline">Sign up</Link>
@@ -45,9 +49,9 @@ export default function Nav({ initialDark = false }) {
         )}
       </nav>
       <div className="flex items-center gap-3">
-        {user && <NotificationBell />}
+        {loggedIn && <NotificationBell />}
         <ThemeToggle initialDark={initialDark} />
-        {user && <AccountMenu />}
+        {loggedIn && <AccountMenu />}
       </div>
     </header>
   );
