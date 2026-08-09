@@ -4,7 +4,8 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { verificationReviews, users } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { updateApassStatus, queryApass, normalizeApassStatus } from "@/lib/cleanverse/apass";
+import { generateApass, queryApass, normalizeApassStatus } from "@/lib/cleanverse/apass";
+import { decryptSecret } from "@/lib/crypto/secret";
 import { logAuditEvent } from "@/lib/audit/log-event";
 
 const decideSchema = z.object({
@@ -12,6 +13,9 @@ const decideSchema = z.object({
   note: z.string().trim().max(500).optional(),
 });
 
+// Cleanverse is only ever contacted here, on approval — a rejected
+// submission never creates an A-Pass in the first place, so there's
+// nothing on Cleanverse's side to freeze/unfreeze either way.
 export async function POST(request, { params }) {
   const guard = await requireAdmin(["support"]);
   if (guard.error) return NextResponse.json({ error: guard.error }, { status: guard.status });
@@ -31,25 +35,29 @@ export async function POST(request, { params }) {
   const user = await db.query.users.findFirst({ where: eq(users.id, review.userId) });
   if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-  // Reject freezes the account's A-Pass on Cleanverse's side too, so both
-  // systems agree — otherwise the wallet would stay "verified" there.
-  if (parsed.data.decision === "rejected" && user.walletAddress) {
-    await updateApassStatus({
-      walletAddress: user.walletAddress,
-      status: "2",
-      blacklistReason: parsed.data.note || "Failed manual review",
-    });
+  let cleanverseRaw = null;
+
+  if (parsed.data.decision === "rejected") {
     await db.update(users).set({ verificationStatus: "frozen" }).where(eq(users.id, user.id));
   }
 
-  // Approve must actively unfreeze — generate_apass does NOT clear a prior
-  // freeze on its own (confirmed live: a resubmission on a frozen wallet
-  // still came back status 2), so without this an approval after any earlier
-  // rejection silently did nothing to the user's real status.
-  if (parsed.data.decision === "approved" && user.walletAddress) {
-    await updateApassStatus({ walletAddress: user.walletAddress, status: "1" });
+  if (parsed.data.decision === "approved") {
+    if (!user.walletAddress) return NextResponse.json({ error: "User has no wallet yet" }, { status: 400 });
+
+    const { fullName, idNumber } = JSON.parse(decryptSecret(review.identityEnc));
+    const genResult = await generateApass({
+      userId: user.id,
+      walletAddress: user.walletAddress,
+      identity: { idType: review.idType, fullName, idNumber, issuingCountryISO2: review.issuingCountryIso2 },
+    });
     const statusResult = await queryApass({ walletAddress: user.walletAddress });
     const normalized = normalizeApassStatus(statusResult);
+    cleanverseRaw = normalized.raw;
+
+    if (normalized.status === "not_connected" && !genResult.ok) {
+      return NextResponse.json({ error: genResult.message || genResult.error || "Cleanverse request failed" }, { status: 502 });
+    }
+
     await db
       .update(users)
       .set({ verificationStatus: normalized.status, verificationCheckedAt: new Date(), verificationRaw: normalized.raw })
@@ -58,7 +66,7 @@ export async function POST(request, { params }) {
 
   await db
     .update(verificationReviews)
-    .set({ reviewStatus: parsed.data.decision, reviewedBy: guard.user.id, reviewedAt: new Date(), reviewNote: parsed.data.note })
+    .set({ reviewStatus: parsed.data.decision, reviewedBy: guard.user.id, reviewedAt: new Date(), reviewNote: parsed.data.note, cleanverseRaw })
     .where(eq(verificationReviews.id, id));
 
   await logAuditEvent({

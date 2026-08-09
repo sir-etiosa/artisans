@@ -6,13 +6,14 @@ import { MUTED, PINE, RED, FOREST, BRASS, LINE } from "@/lib/theme";
 
 const LABELS = {
   not_connected: "Not verified",
+  pending: "Pending review",
   verified: "Verified",
   frozen: "Frozen",
   error: "Check failed",
   unknown: "Unknown",
 };
 
-const COLORS = { verified: FOREST, frozen: RED, error: RED };
+const COLORS = { pending: BRASS, verified: FOREST, frozen: RED, error: RED };
 
 const ID_TYPES = [
   { value: "ID_CARD", label: "National ID card" },
@@ -21,7 +22,7 @@ const ID_TYPES = [
   { value: "RESIDENCE_PERMIT", label: "Residence permit" },
 ];
 
-export default function VerificationStatus({ status, checkedAt, pending, onUpdate }) {
+export default function VerificationStatus({ status, checkedAt, onUpdate }) {
   const [open, setOpen] = useState(false);
   const [idType, setIdType] = useState("ID_CARD");
   const [fullName, setFullName] = useState("");
@@ -34,14 +35,11 @@ export default function VerificationStatus({ status, checkedAt, pending, onUpdat
 
   // "frozen" means a staff review rejected this — don't let the account
   // self-serve a resubmit around that; it has to go through support.
-  const locked = status === "verified" || status === "frozen";
-  // Cleanverse can clear instantly, but a human still has to do the
-  // fraud-check pass before this account is really "Verified" — until
-  // that's done, show pending even though the underlying status already
-  // says verified.
-  const showPending = pending && status !== "frozen";
-  const label = showPending ? "Pending review" : LABELS[status] || LABELS.not_connected;
-  const color = showPending ? BRASS : COLORS[status];
+  // "pending" means it's already in the review queue — resubmitting would
+  // just create a second copy of the same thing.
+  const locked = status === "verified" || status === "frozen" || status === "pending";
+  const label = LABELS[status] || LABELS.not_connected;
+  const color = COLORS[status];
 
   const pickImage = (e) => {
     const file = e.target.files?.[0] || null;

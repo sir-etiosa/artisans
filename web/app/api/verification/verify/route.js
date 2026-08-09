@@ -5,7 +5,6 @@ import { db } from "@/db";
 import { users, verificationReviews } from "@/db/schema";
 import { getSession } from "@/lib/auth/session";
 import { isCleanverseConfigured } from "@/lib/cleanverse/client";
-import { generateApass, queryApass, normalizeApassStatus } from "@/lib/cleanverse/apass";
 import { provisionWallet } from "@/lib/wallet/provision";
 import { documentHash } from "@/lib/verification/document-hash";
 import { encryptSecret } from "@/lib/crypto/secret";
@@ -20,6 +19,9 @@ const identitySchema = z.object({
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
+// Submission only stores the review, encrypted, for a human to look at —
+// Cleanverse isn't called yet. That happens only once a tx/support admin
+// approves it, in app/api/admin/verification-reviews/[id]/decide/route.js.
 export async function POST(request) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
@@ -28,6 +30,9 @@ export async function POST(request) {
   if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
   if (user.verificationStatus === "verified") {
     return NextResponse.json({ error: "Already verified" }, { status: 400 });
+  }
+  if (user.verificationStatus === "pending") {
+    return NextResponse.json({ error: "Your submission is already pending review" }, { status: 400 });
   }
   // Staff rejected a prior submission — no self-serve resubmit around that.
   if (user.verificationStatus === "frozen") {
@@ -73,6 +78,7 @@ export async function POST(request) {
   }
 
   // Accounts verified before wallet provisioning existed won't have one yet.
+  // This is just a local keypair — no Cleanverse call, safe to do now.
   if (!user.walletAddress) {
     const wallet = provisionWallet();
     [user] = await db
@@ -82,21 +88,11 @@ export async function POST(request) {
       .returning();
   }
 
-  const genResult = await generateApass({ userId: user.id, walletAddress: user.walletAddress, identity: parsed.data });
-  const statusResult = await queryApass({ walletAddress: user.walletAddress });
-  const normalized = normalizeApassStatus(statusResult);
-
-  // Generation can fail on a retry (A-Pass already exists for this wallet) —
-  // that's fine as long as the status query below actually found a record.
-  if (normalized.status === "not_connected" && !genResult.ok) {
-    return NextResponse.json({ error: genResult.message || genResult.error || "Verification request failed" }, { status: 502 });
-  }
-
   let updated;
   try {
     [updated] = await db
       .update(users)
-      .set({ verificationStatus: normalized.status, verificationCheckedAt: new Date(), verificationRaw: normalized.raw, verificationIdHash: idHash })
+      .set({ verificationStatus: "pending", verificationIdHash: idHash })
       .where(eq(users.id, user.id))
       .returning();
   } catch (err) {
@@ -107,8 +103,9 @@ export async function POST(request) {
     throw err;
   }
 
-  // Fraud-review record — kept regardless of outcome so staff have a
-  // durable trail; the raw name/ID number only exist here, encrypted.
+  // Fraud-review record — the raw name/ID number only exist here, encrypted.
+  // reviewStatus stays "pending" until a human decides; that decision is
+  // what actually triggers the real Cleanverse call.
   await db.insert(verificationReviews).values({
     userId: user.id,
     idType: parsed.data.idType,
@@ -117,7 +114,6 @@ export async function POST(request) {
     idImageEnc: encryptSecret(idImageBuffer.toString("base64")),
     idImageMimeType: idImage.type,
     documentHash: idHash,
-    cleanverseRaw: normalized.raw,
   });
 
   const { passwordHash, walletPrivateKeyEnc, verificationIdHash: _idHash, ...publicUser } = updated;

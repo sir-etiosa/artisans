@@ -56,7 +56,7 @@ function VerificationContent() {
     <>
       <h1 className="disp font-bold" style={{ fontSize: "clamp(1.5rem,3.5vw,1.9rem)" }}>Identity review queue</h1>
       <p className="mt-1 text-[14px]" style={{ color: MUTED }}>
-        Cleanverse verifies instantly on submission — this is the fraud-check pass afterward. Rejecting freezes the account&apos;s A-Pass.
+Cleanverse isn&apos;t contacted until you decide — approving here is what actually creates the account&apos;s A-Pass; rejecting never sends it at all.
       </p>
 
       <div className="grid md:grid-cols-2 gap-5 mt-6">

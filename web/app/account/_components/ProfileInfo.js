@@ -19,7 +19,7 @@ export default function ProfileInfo({ user, onUserUpdate }) {
         <Row label="Full name" value={user.fullName} />
         <Row label="Email" value={<>{user.email} {user.emailVerified && <Tick />}</>} />
         <Row label="Phone" value={user.phone || "—"} />
-        <VerificationStatus status={user.verificationStatus} checkedAt={user.verificationCheckedAt} pending={user.hasPendingReview} onUpdate={onUserUpdate} />
+        <VerificationStatus status={user.verificationStatus} checkedAt={user.verificationCheckedAt} onUpdate={onUserUpdate} />
       </div>
     </section>
   );

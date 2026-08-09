@@ -12,7 +12,11 @@ export async function GET() {
 
   const user = await db.query.users.findFirst({ where: eq(users.id, session.userId) });
   if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
-  if (!user.walletAddress || !isCleanverseConfigured()) {
+  // "pending" means no A-Pass exists yet — that's only created on admin
+  // approval now, so there's nothing on Cleanverse's side to check yet.
+  // Querying anyway would come back "not_connected" and silently wipe out
+  // the pending state.
+  if (!user.walletAddress || !isCleanverseConfigured() || user.verificationStatus === "pending") {
     return NextResponse.json({ user: { verificationStatus: user.verificationStatus } });
   }
 
