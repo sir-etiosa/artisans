@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PINE, MUTED } from "@/lib/theme";
 import ProfileInfo from "./_components/ProfileInfo";
+import BalanceCard from "./_components/BalanceCard";
 import ChangePasswordForm from "./_components/ChangePasswordForm";
 
 export default function AccountPage() {
@@ -27,6 +28,7 @@ export default function AccountPage() {
       ) : (
         <div className="space-y-5 mt-5">
           <ProfileInfo user={user} onUserUpdate={setUser} />
+          <BalanceCard user={user} />
           <ChangePasswordForm />
         </div>
       )}

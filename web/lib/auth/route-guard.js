@@ -6,7 +6,10 @@ const PUBLIC_PATHS = ["/auth", "/verify-email", "/forgot-password", "/reset-pass
 function isPublic(pathname) {
   return (
     PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`)) ||
-    pathname.startsWith("/api/auth")
+    pathname.startsWith("/api/auth") ||
+    // Server-to-server callback — no session cookie exists to check.
+    // Authenticity is verified inside the route via the HMAC signature header.
+    pathname === "/api/paystack/webhook"
   );
 }
 

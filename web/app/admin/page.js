@@ -38,12 +38,14 @@ export default function AdminHubPage() {
           <p className="text-[13px] mt-1" style={{ color: MUTED }}>Approve or reject submitted ID + photo verifications.</p>
         </a>
 
-        <div className="card soft p-5" style={{ opacity: canApproveDeposits ? 1 : 0.4, borderStyle: canApproveDeposits ? "solid" : "dashed" }}>
+        <a href={canApproveDeposits ? "/admin/deposits" : undefined}
+          className="card soft p-5 block"
+          style={{ opacity: canApproveDeposits ? 1 : 0.4, pointerEvents: canApproveDeposits ? "auto" : "none" }}>
           <h2 className="disp font-bold text-[16px]">Deposit approval</h2>
           <p className="text-[13px] mt-1" style={{ color: MUTED }}>
-            {canApproveDeposits ? "Coming soon — Paystack deposits will land here for approval before ART is sent." : "Not available for your role."}
+            Paystack-confirmed deposits waiting for ART to be sent. ART transfer itself is still a stub until the token is deployed.
           </p>
-        </div>
+        </a>
       </div>
     </main>
   );
