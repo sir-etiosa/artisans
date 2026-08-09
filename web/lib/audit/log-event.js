@@ -2,6 +2,7 @@ import { createHash } from "crypto";
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
 import { auditLogs } from "@/db/schema";
+import { canonicalStringify } from "./canonical-json";
 
 const GENESIS_HASH = "0".repeat(64);
 
@@ -12,7 +13,7 @@ const GENESIS_HASH = "0".repeat(64);
 const LOCK_KEY = 847362910;
 
 function computeHash(prevHash, fields) {
-  return createHash("sha256").update(prevHash + JSON.stringify(fields)).digest("hex");
+  return createHash("sha256").update(prevHash + canonicalStringify(fields)).digest("hex");
 }
 
 // Fire-and-forget by design: an audit-write failure shouldn't be able to

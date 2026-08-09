@@ -2,11 +2,12 @@ import { createHash } from "crypto";
 import { asc } from "drizzle-orm";
 import { db } from "@/db";
 import { auditLogs } from "@/db/schema";
+import { canonicalStringify } from "./canonical-json";
 
 const GENESIS_HASH = "0".repeat(64);
 
 function computeHash(prevHash, fields) {
-  return createHash("sha256").update(prevHash + JSON.stringify(fields)).digest("hex");
+  return createHash("sha256").update(prevHash + canonicalStringify(fields)).digest("hex");
 }
 
 // Recomputes every row's hash from its own content and compares against
