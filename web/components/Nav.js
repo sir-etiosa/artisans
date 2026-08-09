@@ -6,10 +6,12 @@ import { Logo } from "@/components/ui";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
 import AccountMenu from "@/components/account-menu/AccountMenu";
+import { useCurrentUser } from "@/lib/auth/useCurrentUser";
 import { PAPER, LINE, INK, MUTED } from "@/lib/theme";
 
 export default function Nav({ initialDark = false }) {
   const pathname = usePathname();
+  const { user } = useCurrentUser();
 
   /* auth screen has its own full-bleed layout — just float the theme toggle */
   if (pathname === "/auth") return <ThemeToggle floating initialDark={initialDark} />;
@@ -29,13 +31,17 @@ export default function Nav({ initialDark = false }) {
         <Link href="/" className="hover:underline" style={{ color: isActive("/") ? INK : undefined }}>Find artisans</Link>
         <Link href="/search" className="hover:underline" style={{ color: isActive("/search") ? INK : undefined }}>Browse all</Link>
         <Link href="/goods" className="hover:underline" style={{ color: isActive("/goods") ? INK : undefined }}>Goods</Link>
-        <Link href="/messages" className="hover:underline" style={{ color: isActive("/messages") ? INK : undefined }}>Messages</Link>
-        <Link href="/dashboard" className="hover:underline" style={{ color: isActive("/dashboard") ? INK : undefined }}>Artisan dashboard</Link>
+        {user && (
+          <>
+            <Link href="/dashboard" className="hover:underline" style={{ color: isActive("/dashboard") ? INK : undefined }}>Artisan dashboard</Link>
+            <Link href="/messages" className="hover:underline" style={{ color: isActive("/messages") ? INK : undefined }}>Messages</Link>
+          </>
+        )}
       </nav>
       <div className="flex items-center gap-3">
-        <NotificationBell />
+        {user && <NotificationBell />}
         <ThemeToggle initialDark={initialDark} />
-        <AccountMenu />
+        {user && <AccountMenu />}
       </div>
     </header>
   );
