@@ -9,3 +9,4 @@ export * from "./bookings";
 export * from "./deposits";
 export * from "./bank-accounts";
 export * from "./withdrawals";
+export * from "./goods-listings";
