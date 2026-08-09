@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/Nav";
+import Footer from "@/components/Footer";
 import { THEME_COOKIE_NAME } from "@/lib/theme-mode/cookie";
 
 const inter = Inter({
@@ -31,6 +32,7 @@ export default async function RootLayout({ children }) {
       <body className="pb-20">
         <Nav initialDark={dark} />
         {children}
+        <Footer />
       </body>
     </html>
   );
