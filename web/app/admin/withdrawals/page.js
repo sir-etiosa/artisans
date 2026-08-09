@@ -1,27 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Btn } from "@/components/ui";
-import { MUTED, RED, PINE, LINE } from "@/lib/theme";
+import AdminShell from "@/components/admin/AdminShell";
+import { MUTED, RED, LINE } from "@/lib/theme";
 
-export default function AdminWithdrawalsPage() {
-  const router = useRouter();
-  const [authorized, setAuthorized] = useState(false);
+function WithdrawalsContent() {
   const [rows, setRows] = useState(null);
   const [busyId, setBusyId] = useState(null);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetch("/api/auth/me")
-      .then((res) => (res.ok ? res.json() : Promise.reject()))
-      .then((data) => {
-        if (data.user.adminRole !== "tx" && data.user.adminRole !== "full") router.replace("/admin");
-        else setAuthorized(true);
-      })
-      .catch(() => router.replace("/auth"));
-  }, [router]);
 
   const load = () => {
     fetch("/api/admin/withdrawals")
@@ -29,7 +16,7 @@ export default function AdminWithdrawalsPage() {
       .then((data) => setRows(data.withdrawals || []));
   };
 
-  useEffect(() => { if (authorized) load(); }, [authorized]);
+  useEffect(() => { load(); }, []);
 
   const approve = async (id) => {
     setBusyId(id);
@@ -41,12 +28,9 @@ export default function AdminWithdrawalsPage() {
     setBusyId(null);
   };
 
-  if (!authorized) return null;
-
   return (
-    <main className="max-w-3xl mx-auto px-4 md:px-8 pt-8 pb-16">
-      <Link href="/admin" className="text-sm font-semibold underline" style={{ color: PINE }}>← Admin</Link>
-      <h1 className="disp font-bold mt-3" style={{ fontSize: "clamp(1.7rem,4vw,2.2rem)" }}>Withdrawal approvals</h1>
+    <>
+      <h1 className="disp font-bold" style={{ fontSize: "clamp(1.5rem,3.5vw,1.9rem)" }}>Withdrawal approvals</h1>
       <p className="mt-1 text-[14px]" style={{ color: MUTED }}>
         Approving returns ART to treasury and pays out via a real Paystack transfer.
       </p>
@@ -71,6 +55,14 @@ export default function AdminWithdrawalsPage() {
           </div>
         ))}
       </div>
-    </main>
+    </>
+  );
+}
+
+export default function AdminWithdrawalsPage() {
+  return (
+    <AdminShell allowedRoles={["tx"]}>
+      <WithdrawalsContent />
+    </AdminShell>
   );
 }

@@ -1,14 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Btn, Pagination } from "@/components/ui";
-import { MUTED, RED, PINE, LINE, FOREST, BRASS_SOFT } from "@/lib/theme";
+import AdminShell from "@/components/admin/AdminShell";
+import { MUTED, RED, LINE, FOREST, BRASS, BRASS_SOFT, PINE } from "@/lib/theme";
 
-export default function AdminAuditPage() {
-  const router = useRouter();
-  const [authorized, setAuthorized] = useState(false);
+function eventBadge(eventType) {
+  if (eventType.startsWith("login") || eventType === "signup" || eventType.startsWith("password")) {
+    return { label: "Auth", color: PINE };
+  }
+  if (eventType.startsWith("verification")) return { label: "Identity", color: FOREST };
+  if (eventType.includes("resolved_by_admin")) return { label: "Admin", color: RED };
+  if (eventType.includes("deposit") || eventType.includes("withdrawal") || eventType.includes("escrow") || eventType.includes("booking")) {
+    return { label: "Money", color: BRASS };
+  }
+  return { label: "Event", color: MUTED };
+}
+
+function AuditContent() {
   const [logs, setLogs] = useState(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -16,24 +25,13 @@ export default function AdminAuditPage() {
   const [verifyResult, setVerifyResult] = useState(null);
 
   useEffect(() => {
-    fetch("/api/auth/me")
-      .then((res) => (res.ok ? res.json() : Promise.reject()))
-      .then((data) => {
-        if (data.user.adminRole !== "full") router.replace("/admin");
-        else setAuthorized(true);
-      })
-      .catch(() => router.replace("/auth"));
-  }, [router]);
-
-  useEffect(() => {
-    if (!authorized) return;
     fetch(`/api/admin/audit?page=${page}`)
       .then((res) => res.json())
       .then((data) => {
         setLogs(data.logs || []);
         setTotalPages(Math.max(1, Math.ceil((data.total || 0) / data.pageSize)));
       });
-  }, [authorized, page]);
+  }, [page]);
 
   const verify = async () => {
     setVerifying(true);
@@ -44,12 +42,9 @@ export default function AdminAuditPage() {
     setVerifying(false);
   };
 
-  if (!authorized) return null;
-
   return (
-    <main className="max-w-4xl mx-auto px-4 md:px-8 pt-8 pb-16">
-      <Link href="/admin" className="text-sm font-semibold underline" style={{ color: PINE }}>← Admin</Link>
-      <h1 className="disp font-bold mt-3" style={{ fontSize: "clamp(1.7rem,4vw,2.2rem)" }}>Audit log</h1>
+    <>
+      <h1 className="disp font-bold" style={{ fontSize: "clamp(1.5rem,3.5vw,1.9rem)" }}>Audit log</h1>
       <p className="mt-1 text-[14px]" style={{ color: MUTED }}>
         Append-only, hash-chained record of every signup, login, verification decision, deposit/withdrawal approval,
         and booking status change. Editing or deleting a row here directly in the database is blocked by a DB trigger —
@@ -83,23 +78,39 @@ export default function AdminAuditPage() {
       <div className="mt-6 card soft divide-y" style={{ borderColor: LINE }}>
         {!logs && <p className="p-4 text-[13px]" style={{ color: MUTED }}>Loading…</p>}
         {logs?.length === 0 && <p className="p-4 text-[13px]" style={{ color: MUTED }}>Nothing logged yet.</p>}
-        {logs?.map((l) => (
-          <div key={l.id} className="p-4">
-            <div className="flex flex-wrap gap-3 justify-between items-baseline">
-              <p className="font-semibold text-[14px]">{l.eventType}</p>
-              <p className="text-[12px]" style={{ color: MUTED }}>{new Date(l.createdAt).toLocaleString()}</p>
+        {logs?.map((l) => {
+          const badge = eventBadge(l.eventType);
+          return (
+            <div key={l.id} className="p-4">
+              <div className="flex flex-wrap gap-2 justify-between items-center">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0" style={{ background: `${badge.color}22`, color: badge.color }}>
+                    {badge.label}
+                  </span>
+                  <p className="font-semibold text-[14px] truncate">{l.eventType}</p>
+                </div>
+                <p className="text-[12px] shrink-0" style={{ color: MUTED }}>{new Date(l.createdAt).toLocaleString()}</p>
+              </div>
+              <p className="text-[13px] mt-1" style={{ color: MUTED }}>
+                {l.actorEmail || "system"}{l.targetType && ` · ${l.targetType}:${String(l.targetId).slice(0, 8)}`}
+              </p>
+              {l.metadata && Object.keys(l.metadata).length > 0 && (
+                <p className="text-[12px] mt-1" style={{ color: MUTED, fontFamily: "monospace" }}>{JSON.stringify(l.metadata)}</p>
+              )}
             </div>
-            <p className="text-[13px] mt-0.5" style={{ color: MUTED }}>
-              {l.actorEmail || "system"}{l.targetType && ` · ${l.targetType}:${String(l.targetId).slice(0, 8)}`}
-            </p>
-            {l.metadata && Object.keys(l.metadata).length > 0 && (
-              <p className="text-[12px] mt-1" style={{ color: MUTED, fontFamily: "monospace" }}>{JSON.stringify(l.metadata)}</p>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <Pagination page={page} totalPages={totalPages} onChange={setPage} />
-    </main>
+    </>
+  );
+}
+
+export default function AdminAuditPage() {
+  return (
+    <AdminShell allowedRoles={["full"]}>
+      <AuditContent />
+    </AdminShell>
   );
 }

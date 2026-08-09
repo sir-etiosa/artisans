@@ -1,14 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Btn } from "@/components/ui";
-import { MUTED, RED, LINE, MIST, PINE } from "@/lib/theme";
+import AdminShell from "@/components/admin/AdminShell";
+import { MUTED, RED, LINE, MIST } from "@/lib/theme";
 
-export default function AdminVerificationPage() {
-  const router = useRouter();
-  const [authorized, setAuthorized] = useState(false);
+function VerificationContent() {
   const [reviews, setReviews] = useState(null);
   const [selected, setSelected] = useState(null);
   const [detail, setDetail] = useState(null);
@@ -16,25 +13,13 @@ export default function AdminVerificationPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetch("/api/auth/me")
-      .then((res) => (res.ok ? res.json() : Promise.reject()))
-      .then((data) => {
-        if (data.user.adminRole !== "support" && data.user.adminRole !== "full") router.replace("/admin");
-        else setAuthorized(true);
-      })
-      .catch(() => router.replace("/auth"));
-  }, [router]);
-
   const loadReviews = () => {
     fetch("/api/admin/verification-reviews")
       .then((res) => res.json())
       .then((data) => setReviews(data.reviews || []));
   };
 
-  useEffect(() => {
-    if (authorized) loadReviews();
-  }, [authorized]);
+  useEffect(() => { loadReviews(); }, []);
 
   const openReview = (id) => {
     setSelected(id);
@@ -67,12 +52,9 @@ export default function AdminVerificationPage() {
     }
   };
 
-  if (!authorized) return null;
-
   return (
-    <main className="max-w-4xl mx-auto px-4 md:px-8 pt-8 pb-16">
-      <Link href="/admin" className="text-sm font-semibold underline" style={{ color: PINE }}>← Admin</Link>
-      <h1 className="disp font-bold mt-3" style={{ fontSize: "clamp(1.7rem,4vw,2.2rem)" }}>Identity review queue</h1>
+    <>
+      <h1 className="disp font-bold" style={{ fontSize: "clamp(1.5rem,3.5vw,1.9rem)" }}>Identity review queue</h1>
       <p className="mt-1 text-[14px]" style={{ color: MUTED }}>
         Cleanverse verifies instantly on submission — this is the fraud-check pass afterward. Rejecting freezes the account&apos;s A-Pass.
       </p>
@@ -140,6 +122,14 @@ export default function AdminVerificationPage() {
           )}
         </section>
       </div>
-    </main>
+    </>
+  );
+}
+
+export default function AdminVerificationPage() {
+  return (
+    <AdminShell allowedRoles={["support"]}>
+      <VerificationContent />
+    </AdminShell>
   );
 }
