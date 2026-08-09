@@ -34,6 +34,7 @@ export async function GET(request) {
       lat: goodsListings.lat,
       lng: goodsListings.lng,
       createdAt: goodsListings.createdAt,
+      sellerId: goodsListings.userId,
       sellerName: users.fullName,
       sellerArea: artisanProfiles.area,
     })

@@ -9,6 +9,7 @@ import { useDashboard } from "./_hooks/useDashboard";
 import CreateProfileForm from "./_components/CreateProfileForm";
 import BookingRequests from "./_components/BookingRequests";
 import ProfileCard from "./_components/ProfileCard";
+import GoodsSection from "./_components/GoodsSection";
 
 export default function DashboardPage() {
   const { user } = useCurrentUser();
@@ -78,6 +79,10 @@ export default function DashboardPage() {
             <BookingRequests requests={requests} onChanged={reload} />
 
             <ProfileCard profile={profile} onChanged={reload} />
+          </div>
+
+          <div className="mt-6">
+            <GoodsSection />
           </div>
         </>
       )}
