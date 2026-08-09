@@ -1,7 +1,6 @@
 import { Tick } from "@/components/ui";
 import { LINE, MUTED } from "@/lib/theme";
 import VerificationStatus from "./VerificationStatus";
-import CopyWalletRow from "./CopyWalletRow";
 
 function Row({ label, value }) {
   return (
@@ -20,10 +19,7 @@ export default function ProfileInfo({ user, onUserUpdate }) {
         <Row label="Full name" value={user.fullName} />
         <Row label="Email" value={<>{user.email} {user.emailVerified && <Tick />}</>} />
         <Row label="Phone" value={user.phone || "—"} />
-        <div style={{ borderBottom: `1px solid ${LINE}` }}>
-          <VerificationStatus status={user.verificationStatus} checkedAt={user.verificationCheckedAt} onUpdate={onUserUpdate} />
-        </div>
-        <CopyWalletRow walletAddress={user.walletAddress} />
+        <VerificationStatus status={user.verificationStatus} checkedAt={user.verificationCheckedAt} onUpdate={onUserUpdate} />
       </div>
     </section>
   );

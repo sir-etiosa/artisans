@@ -1,4 +1,4 @@
-import { parseUnits } from "viem";
+import { parseUnits, formatUnits } from "viem";
 import { monadPublicClient, operatorWalletClient, userWalletClient } from "./monad-client";
 
 // ART is live (0x96F652EAd14F1E34695a2000A86a478fDf70D9F8, Monad testnet),
@@ -27,6 +27,21 @@ export function isArtTokenConfigured() {
 const ERC20_TRANSFER_ABI = [
   { type: "function", name: "transfer", inputs: [{ name: "to", type: "address" }, { name: "amount", type: "uint256" }], outputs: [{ type: "bool" }], stateMutability: "nonpayable" },
 ];
+
+const ERC20_BALANCE_ABI = [
+  { type: "function", name: "balanceOf", inputs: [{ name: "account", type: "address" }], outputs: [{ type: "uint256" }], stateMutability: "view" },
+];
+
+export async function getArtBalance(address) {
+  if (!isArtTokenConfigured() || !address) return null;
+  const raw = await monadPublicClient().readContract({
+    address: process.env.ART_TOKEN_ADDRESS,
+    abi: ERC20_BALANCE_ABI,
+    functionName: "balanceOf",
+    args: [address],
+  });
+  return Number(formatUnits(raw, 18));
+}
 
 // Explicit gas required — viem's automatic estimation unreliably fails
 // against Monad's RPC for this call (compliance-rule checks make it far

@@ -36,6 +36,7 @@ export default function AccountMenu() {
             <p className="text-[12px] truncate" style={{ color: MUTED }}>{user?.email || ""}</p>
           </div>
           <div style={{ height: 1, background: LINE, margin: "4px 0" }} />
+          <MenuItem href="/account?tab=profile" onClick={() => setOpen(false)}>Profile</MenuItem>
           <MenuItem href="/account" onClick={() => setOpen(false)}>Account &amp; settings</MenuItem>
           <div style={{ height: 1, background: LINE, margin: "4px 0" }} />
           <MenuItem danger onClick={logout}>Log out</MenuItem>
