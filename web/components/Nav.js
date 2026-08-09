@@ -6,7 +6,7 @@ import { Logo } from "@/components/ui";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
 import AccountMenu from "@/components/account-menu/AccountMenu";
-import { PAPER, LINE, INK, MUTED } from "@/lib/theme";
+import { PAPER, LINE, INK, MUTED, CARD } from "@/lib/theme";
 
 export default function Nav({ initialDark = false, initialLoggedIn = false }) {
   const pathname = usePathname();
@@ -51,6 +51,21 @@ export default function Nav({ initialDark = false, initialLoggedIn = false }) {
       </nav>
       <div className="flex items-center gap-3">
         {loggedIn && <NotificationBell />}
+        {/* Desktop nav already has Log in/Sign up links (hidden below md) —
+            this is the only way in on mobile, so it needs to exist here too,
+            just much smaller than the icon buttons next to it. */}
+        {!loggedIn && (
+          <Link
+            href="/auth"
+            className="md:hidden font-semibold whitespace-nowrap"
+            style={{
+              fontSize: 11, lineHeight: 1, padding: "8px 10px", borderRadius: 999,
+              background: CARD, border: `1px solid ${LINE}`, color: INK,
+            }}
+          >
+            Log in / Sign up
+          </Link>
+        )}
         <ThemeToggle initialDark={initialDark} />
         {loggedIn && <AccountMenu />}
       </div>
