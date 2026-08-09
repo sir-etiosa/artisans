@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Btn } from "@/components/ui";
 import { MUTED } from "@/lib/theme";
 import ConversationRow from "./_components/ConversationRow";
+import MessageSupportButton from "@/components/MessageSupportButton";
 
 export default function MessagesPage() {
   const router = useRouter();
@@ -21,7 +22,10 @@ export default function MessagesPage() {
     <main className="max-w-2xl mx-auto px-4 md:px-8 pt-8">
       <div className="flex items-center justify-between gap-3">
         <h1 className="disp font-bold" style={{ fontSize: "clamp(1.7rem,4vw,2.2rem)" }}>Messages</h1>
-        <Btn primary small onClick={() => router.push("/messages/new")}>New message</Btn>
+        <div className="flex gap-2">
+          <MessageSupportButton small>Message support</MessageSupportButton>
+          <Btn primary small onClick={() => router.push("/messages/new")}>New message</Btn>
+        </div>
       </div>
 
       <div className="space-y-3 mt-5">

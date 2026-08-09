@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Btn } from "@/components/ui";
 import { BRASS, BRASS_SOFT, CARD, FOREST, INK, LINE, MUTED, PAPER, PINE } from "@/lib/theme";
+import MessageSupportButton from "@/components/MessageSupportButton";
 
 export default function BookingRequests({ requests, onChanged }) {
   const router = useRouter();
@@ -67,6 +68,9 @@ export default function BookingRequests({ requests, onChanged }) {
                 </>
               )}
               <Btn small onClick={() => chat(r.customerId)}>Chat</Btn>
+              <MessageSupportButton small note={`Need help with a booking (${r.jobDescription}) with ${r.customerName}, booking ID ${r.id}.`}>
+                Loop in support
+              </MessageSupportButton>
             </div>
           </div>
         );
