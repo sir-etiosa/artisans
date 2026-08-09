@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/ui";
 import ThemeToggle from "@/components/ThemeToggle";
+import NotificationBell from "@/components/NotificationBell";
 import AccountMenu from "@/components/account-menu/AccountMenu";
 import { PAPER, LINE, INK, MUTED } from "@/lib/theme";
 
@@ -31,6 +32,7 @@ export default function Nav({ initialDark = false }) {
         <Link href="/dashboard" className="hover:underline" style={{ color: isActive("/dashboard") ? INK : undefined }}>Artisan dashboard</Link>
       </nav>
       <div className="flex items-center gap-3">
+        <NotificationBell />
         <ThemeToggle initialDark={initialDark} />
         <AccountMenu />
       </div>
