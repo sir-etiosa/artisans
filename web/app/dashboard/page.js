@@ -41,11 +41,22 @@ export default function DashboardPage() {
             </span>
           </h1>
         </div>
-        {profile && newCount > 0 && (
-          <span className="text-[13px] font-semibold px-3 py-1.5 rounded-full" style={{ background: BRASS_SOFT, color: FOREST, border: `1px solid ${BRASS}66` }}>
-            {newCount} new request{newCount === 1 ? "" : "s"}
-          </span>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {user?.adminRole && (
+            <Link
+              href="/admin"
+              className="text-[13px] font-semibold px-3 py-1.5 rounded-full"
+              style={{ background: FOREST, color: "#fff", border: `1px solid ${FOREST}` }}
+            >
+              Admin
+            </Link>
+          )}
+          {profile && newCount > 0 && (
+            <span className="text-[13px] font-semibold px-3 py-1.5 rounded-full" style={{ background: BRASS_SOFT, color: FOREST, border: `1px solid ${BRASS}66` }}>
+              {newCount} new request{newCount === 1 ? "" : "s"}
+            </span>
+          )}
+        </div>
       </div>
 
       {user && (
